@@ -24,8 +24,9 @@ import {
 } from "@chakra-ui/react";
 import { FaPlus, FaRedo, FaSearch } from "react-icons/fa";
 import ArticleTable from "../ui/ArticleTable";
-import { articleService, type ArticleDto } from "../../services/articleService";
-import { categoryService, type CategoryDto } from "../../services/categoryService";
+import { articleService } from "../../services/articleService";
+import { categoryService } from "../../services/categoryService";
+import type { ArticleDto, CategoryDto } from "../../types";
 import { useArticleEditor } from "../../hooks/useArticleEditor";
 import ArticleEditModal from "./modal/ArticleEditModal";
 import FilterBar from "../ui/FilterBar";

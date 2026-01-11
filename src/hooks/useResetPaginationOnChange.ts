@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 
-
 export function useResetPaginationOnChange(
     deps: unknown[],
     onReset: () => void,

@@ -5,7 +5,8 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { rbacService, type RoleDto } from "../../services/rbacService";
+import { rbacService } from "../../services/rbacService";
+import type { RoleDto } from "../../types";
 
 export default function UserRolesPage() {
   const { userId } = useParams();

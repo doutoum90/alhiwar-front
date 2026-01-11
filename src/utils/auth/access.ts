@@ -1,21 +1,6 @@
 
 import { PROTECTED_MENU } from "../../constantes";
-
-export type AuthUser = {
-  
-  role?: string;
-
-  
-  roles?: string[];
-  permissions?: string[];
-};
-
-export type AccessRule = {
-  role?: string;
-  roles?: string[];
-  permissions?: string[];
-  permissionsMode?: "all" | "any"; 
-};
+import type { AccessRule, AuthUser } from "../../types";
 
 
 export function can(me: AuthUser | null | undefined, perm: string) {

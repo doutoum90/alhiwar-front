@@ -14,7 +14,8 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 
-import { categoryService, type CategoryDto } from "../services/categoryService";
+import { categoryService } from "../services/categoryService";
+import type { CategoryDto } from "../types";
 import { normalize } from "../utils/utils";
 
 const toSlug = (c: CategoryDto) =>

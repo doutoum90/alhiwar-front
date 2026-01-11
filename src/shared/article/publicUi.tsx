@@ -18,20 +18,7 @@ import {
 } from "@chakra-ui/react";
 import { FaArrowRight, FaBolt, FaRegClock, FaRegImage } from "react-icons/fa";
 import { abs } from "../../utils/url";
-import type { AdDto } from "../../services/adsService";
-
-export type UiPost = {
-  id: string;
-  title: string;
-  summary: string;
-  imageUrl?: string | null;
-  publishedAt?: string | null;
-  slug?: string | null;
-  categoryLabel?: string | null;
-  views?: number | null;
-};
-
-
+import type { AdDto, UiPost } from "../../types";
 
 export const safeTime = (iso?: string | null) => {
   if (!iso) return 0;

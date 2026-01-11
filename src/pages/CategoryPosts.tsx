@@ -15,11 +15,13 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 
-import { articleService, type ArticleDto } from "../services/articleService";
-import { adsService, type AdDto } from "../services/adsService";
-import { categoryService, type CategoryDto } from "../services/categoryService";
+import { articleService } from "../services/articleService";
+import { adsService } from "../services/adsService";
+import { categoryService } from "../services/categoryService";
+import type { ArticleDto, AdDto, CategoryDto } from "../types";
 import { useArticleThumbs } from "../hooks/useArticleThumbs";
-import { AdCard, RubriqueSection, type UiPost, safeTime } from "../shared/article/publicUi";
+import { AdCard, RubriqueSection, safeTime } from "../shared/article/publicUi";
+import type { UiPost } from "../types";
 
 const toUiPost = (a: any, imageUrl: string | null): UiPost => ({
   id: String(a.id),

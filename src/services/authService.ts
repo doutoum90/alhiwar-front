@@ -1,18 +1,5 @@
-import type { MeDto } from '../types';
+import type { LoginResponse, MeDto } from '../types';
 import { apiFetch } from './api'
-
-export type LoginResponse = {
-    access_token: string;
-    refresh_token: string;
-    user: {
-        id: string;
-        name: string;
-        email: string;
-        role: string;
-        avatar?: string | null;
-        isActive: boolean;
-    };
-};
 
 const AUTH_API_ENDPOINTS = '/api/auth';
 

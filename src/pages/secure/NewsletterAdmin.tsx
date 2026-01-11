@@ -25,7 +25,8 @@ import {
     SimpleGrid,
 } from "@chakra-ui/react";
 import { FaRedo, FaSearch } from "react-icons/fa";
-import { newsletterService, type NewsletterSubscriberDto, type Paginated } from "../../services/newsletterService";
+import { newsletterService } from "../../services/newsletterService";
+import type { NewsletterSubscriberDto, Paginated } from "../../types";
 import NewsletterTable from "../ui/NewsletterTable";
 import FilterBar from "../ui/FilterBar";
 import { useResetPaginationOnChange } from "../../hooks/useResetPaginationOnChange";

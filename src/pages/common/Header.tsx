@@ -20,7 +20,8 @@ import {
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon, MoonIcon, SunIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
-import { categoryService, type CategoryDto } from "../../services/categoryService";
+import { categoryService } from "../../services/categoryService";
+import type { CategoryDto } from "../../types";
 import { normalize } from "../../utils/utils";
 import { NavLink } from "./NavLink";
 import { PUBLIC_MENU } from "../../constantes";

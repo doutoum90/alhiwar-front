@@ -33,7 +33,8 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { FaEllipsisV, FaPlus, FaRedo, FaSearch } from "react-icons/fa";
 import FilterBar from "../ui/FilterBar";
-import { usersService, type UserDto } from "../../services/userService";
+import { usersService } from "../../services/userService";
+import type { UserDto } from "../../types";
 import { normalize, roleLabel, statusColor, statusLabel } from "../../utils/utils";
 
 export default function UserDashboard() {

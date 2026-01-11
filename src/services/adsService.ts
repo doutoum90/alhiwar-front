@@ -1,8 +1,6 @@
 
 import { apiFetch } from "./api";
-
-export type AdType = "banner" | "sidebar" | "popup" | "inline";
-export type AdStatus = "draft" | "in_review" | "rejected" | "published" | "archived";
+import type { AdDto, AdType, CreateAdDto, UpdateAdDto } from "../types";
 
 export enum AdWorkflowStatus {
   DRAFT = "draft",
@@ -12,50 +10,6 @@ export enum AdWorkflowStatus {
   ARCHIVED = "archived",
 }
 
-export interface AdDto {
-  id: string;
-  title: string;
-  content: string;
-  image: string | null;
-  link: string | null;
-
-  views: number;
-  clicks: number;
-  impressions: number;
-
-  clickThroughRate: number;
-  totalRevenue: number;
-
-  type: AdType;
-  status: AdStatus;
-
-  startDate: string | null;
-  endDate: string | null;
-
-  createdById: string | null;
-
-  submittedAt: string | null;
-  submittedById: string | null;
-
-  reviewedAt: string | null;
-  reviewedById: string | null;
-  reviewComment: string | null;
-
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateAdDto {
-  title: string;
-  content: string;
-  image?: string | null;
-  link?: string | null;
-  type?: AdType;
-  startDate?: string | null;
-  endDate?: string | null;
-}
-
-export type UpdateAdDto = Partial<CreateAdDto>;
 
 const cleanStringOrNull = (v: unknown) => {
   if (v === undefined) return undefined;

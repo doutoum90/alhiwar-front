@@ -29,7 +29,7 @@ import {
   FaUndo,
 } from "react-icons/fa";
 
-import type { ArticleDto, ArticleStatus } from "../../services/articleService";
+import type { ArticleDto, ArticleStatus } from "../../types";
 
 import {
   formatDate,

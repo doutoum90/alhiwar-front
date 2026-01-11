@@ -18,9 +18,10 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 
-import { articleService, type ArticleDto } from "../services/articleService";
-import { adsService, type AdDto } from "../services/adsService";
-import { categoryService, type CategoryDto } from "../services/categoryService";
+import { articleService } from "../services/articleService";
+import { adsService } from "../services/adsService";
+import { categoryService } from "../services/categoryService";
+import type { AdDto, ArticleDto, CategoryDto } from "../types";
 
 import { useArticleThumbs } from "../hooks/useArticleThumbs";
 import {
@@ -28,9 +29,9 @@ import {
   ArchiveMiniCard,
   HeroCard,
   RubriqueSection,
-  type UiPost,
   safeTime,
 } from "../shared/article/publicUi";
+import type { UiPost } from "../types";
 import { normalize } from "../utils/utils";
 
 const groupBy = <T, K extends string>(items: T[], keyFn: (i: T) => K) => {

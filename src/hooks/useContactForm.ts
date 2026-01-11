@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useToast } from "@chakra-ui/react";
-import { contactService, type ContactFormData } from "../services/contactService";
+import { contactService } from "../services/contactService";
+import type { ContactFormData } from "../types";
 
 const initialFormState: ContactFormData = {
   message: "",

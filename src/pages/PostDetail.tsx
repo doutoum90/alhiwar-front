@@ -47,18 +47,10 @@ import {
   FaExternalLinkAlt,
 } from "react-icons/fa";
 
-import { articleService, type ArticleDto, type ArticleMediaDto } from "../services/articleService";
+import { articleService } from "../services/articleService";
 import { abs } from "../utils/url";
 import { newspaperPattern } from "../shared/article/publicUi";
-import type { CommentDto } from "../types";
-
-type Paged<T> = {
-  items: T[];
-  total: number;
-  page: number;
-  limit: number;
-  pages: number;
-};
+import type { ArticleDto, ArticleMediaDto, CommentDto, DisplayAuthor, Paged, TocItem } from "../types";
 
 const isUuid = (v: string) =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
@@ -80,8 +72,6 @@ const safeNumber = (n: unknown, fallback = 0) => {
   return Number.isFinite(x) ? x : fallback;
 };
 
-
-type TocItem = { id: string; text: string; level: 2 | 3 };
 
 const slugify = (s: string) =>
   s
@@ -487,8 +477,6 @@ const MediaSection = ({ media }: { media: ArticleMediaDto[] }) => {
   );
 };
 
-
-type DisplayAuthor = { id: string; name: string; avatar?: string | null; isMain: boolean };
 
 const getDisplayAuthors = (article: ArticleDto): DisplayAuthor[] => {
   const links = (article as any)?.authors;

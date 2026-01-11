@@ -1,14 +1,6 @@
 
 import { apiFetch } from "./api";
-
-export type RoleDto = { id: string; key: string; name: string };
-
-export type PermissionDto = {
-  id: string;
-  key: string;
-  label: string;
-  group?: string | null;
-};
+import type { PermissionDto, RoleDto } from "../types";
 
 export const rbacService = {
   listRoles(): Promise<RoleDto[]> {

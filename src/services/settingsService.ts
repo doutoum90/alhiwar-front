@@ -1,57 +1,5 @@
 import { apiFetch } from "./api";
-
-export interface SystemSettingsDto {
-    siteName: string;
-    siteDescription: string;
-    siteUrl: string;
-    adminEmail: string;
-    timezone: string;
-    language: string;
-    maintenanceMode: boolean;
-    registrationEnabled: boolean;
-    commentsEnabled: boolean;
-    emailVerificationRequired: boolean;
-    maxFileSize: number;
-    articlesPerPage: number;
-    sessionTimeout: number;
-}
-
-export interface EmailSettingsDto {
-    smtpHost: string;
-    smtpPort: number;
-    smtpUser: string;
-    smtpPassword?: string | null; 
-    senderName: string;
-    senderEmail: string;
-    enableSSL: boolean;
-}
-
-export interface SecuritySettingsDto {
-    passwordMinLength: number;
-    requireSpecialChars: boolean;
-    sessionDuration: number;
-    maxLoginAttempts: number;
-    twoFactorEnabled: boolean;
-    ipWhitelist: string[];
-}
-
-export interface ApiKeyDto {
-    id: string;
-    name: string;
-    key?: string; 
-    permissions: string[];
-    createdAt: string;
-    lastUsed?: string | null;
-    isActive: boolean;
-}
-
-export interface DbStatsDto {
-    totalSizeMb: number;
-    totalArticles: number;
-    totalUsers: number;
-    lastBackupAt?: string | null;
-    status: "healthy" | "degraded" | "down";
-}
+import type { ApiKeyDto, DbStatsDto, EmailSettingsDto, SecuritySettingsDto, SystemSettingsDto } from "../types";
 
 export const settingsService = {
     

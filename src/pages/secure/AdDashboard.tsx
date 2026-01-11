@@ -78,7 +78,8 @@ import {
   FaTimes,
   FaTrash,
 } from "react-icons/fa";
-import { adsService, type AdDto, type AdType, type AdWorkflowStatus } from "../../services/adsService";
+import { adsService, type AdWorkflowStatus } from "../../services/adsService";
+import type { AdDto, AdType } from "../../types";
 import AppTable from "../ui/AppTable";
 import { EmptyRow } from "../ui/EmptyRow";
 import FilterBar from "../ui/FilterBar";

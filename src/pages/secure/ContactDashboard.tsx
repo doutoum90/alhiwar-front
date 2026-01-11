@@ -24,7 +24,8 @@ import {
   Select,
 } from "@chakra-ui/react";
 import { FaRedo, FaSearch } from "react-icons/fa";
-import { contactService, type ContactDto, type Paginated } from "../../services/contactService";
+import { contactService } from "../../services/contactService";
+import type { ContactDto, Paginated } from "../../types";
 import ContactTable from "../ui/ContactTable";
 import FilterBar from "../ui/FilterBar";
 import { useResetPaginationOnChange } from "../../hooks/useResetPaginationOnChange";

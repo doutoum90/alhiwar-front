@@ -18,7 +18,8 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FaGripVertical, FaTrash, FaUpload } from "react-icons/fa";
-import { articleService, type ArticleMediaDto, type MediaType } from "../../services/articleService";
+import { articleService } from "../../services/articleService";
+import type { ArticleMediaDto, MediaType } from "../../types";
 import { Thumb } from "./Thumb";
 import { iconFor } from "./IconFor";
 

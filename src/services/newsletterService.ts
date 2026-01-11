@@ -1,25 +1,6 @@
 
 import { apiFetch } from "./api";
-
-export type NewsletterSubscriberDto = {
-    id: string;
-    email: string;
-    isVerified: boolean;
-    isActive: boolean;
-    verifyToken?: string | null;
-    verifyTokenExpiresAt?: string | null;
-    unsubscribeToken?: string | null;
-    createdAt?: string;
-    updatedAt?: string;
-};
-
-export type Paginated<T> = {
-    items: T[];
-    total: number;
-    page: number;
-    limit: number;
-    pages: number;
-};
+import type { NewsletterSubscriberDto, Paginated } from "../types";
 
 export const newsletterService = {
     

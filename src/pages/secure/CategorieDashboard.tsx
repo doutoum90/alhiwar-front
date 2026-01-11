@@ -53,7 +53,8 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FaPlus, FaEdit, FaTrash, FaSearch, FaEllipsisV, FaRedo } from "react-icons/fa";
-import { categoryService, type CategoryDto, type CategoryStatus } from "../../services/categoryService";
+import { categoryService } from "../../services/categoryService";
+import type { CategoryDto, CategoryStatus } from "../../types";
 import FilterBar from "../ui/FilterBar";
 import { useResetPaginationOnChange } from "../../hooks/useResetPaginationOnChange";
 import { useClampPagination } from "../../hooks/useClampPagination";

@@ -1,99 +1,18 @@
 
-import type { CommentDto } from "../types";
+import type {
+  ArticleDto,
+  ArticleMediaDto,
+  CommentDto,
+  CommentStatus,
+  CreateArticleDto,
+  MediaType,
+  Paged,
+  UpdateArticleDto,
+  UpdateAuthorsDto,
+  UserMiniDto,
+} from "../types";
 import { apiFetch } from "./api";
 
-export type ArticleStatus = "draft" | "in_review" | "rejected" | "published" | "archived";
-export type CommentStatus = "visible" | "pending" | "hidden";
-
-export interface UserMiniDto {
-  id: string;
-  name: string;
-  email?: string;
-  avatar?: string | null;
-  username?: string | null;
-}
-
-
-
-export type MediaType = "image" | "video" | "pdf";
-
-export interface CategoryDto {
-  id: string;
-  name: string;
-  slug?: string | null;
-}
-
-export type ArticleAuthorLinkDto = {
-  id: string;
-  articleId: string;
-  userId: string;
-  isMain: boolean;
-  user: UserMiniDto;
-};
-
-export interface ArticleDto {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt?: string | null;
-  content?: string | null;
-  status: ArticleStatus;
-
-  views?: number | null;
-  likesCount?: number | null;
-  commentsCount?: number | null;
-
-  createdAt?: string;
-  updatedAt?: string;
-  publishedAt?: string | null;
-
-  categoryId?: string | null;
-  category?: CategoryDto | null;
-
-  authorId?: string | null;
-  author?: UserMiniDto | null;
-
-  tags?: string[] | null;
-  authors?: ArticleAuthorLinkDto[];
-
-  submittedAt?: string | null;
-  submittedById?: string | null;
-  reviewedAt?: string | null;
-  reviewedById?: string | null;
-  reviewComment?: string | null;
-}
-
-export interface CreateArticleDto {
-  title: string;
-  excerpt?: string | null;
-  content: string;
-  categoryId: string;
-  status?: ArticleStatus;
-  tags?: string[] | null;
-}
-export type UpdateArticleDto = Partial<CreateArticleDto>;
-
-export interface ArticleMediaDto {
-  id: string;
-  articleId: string;
-  type: MediaType;
-  url: string;
-  title?: string | null;
-  position?: number | null;
-  createdAt?: string;
-}
-
-export type Paged<T> = {
-  items: T[];
-  total: number;
-  page: number;
-  limit: number;
-  pages: number;
-};
-
-export interface UpdateAuthorsDto {
-  authorIds: string[];
-}
 
 const cleanStringOrNull = (v: unknown) => {
   if (v === undefined) return undefined;

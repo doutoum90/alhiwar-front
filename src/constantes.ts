@@ -15,6 +15,7 @@ import {
   FaKey,
   FaUserShield,
 } from "react-icons/fa";
+import type { MenuItem } from "./types";
 
 export const PARAGRAPHS = [
   {
@@ -76,15 +77,6 @@ export const COPYRIGHT = `© ${YEAR} Alhiwar. Tous droits réservés`;
 
 export const DASHBOARD_TITLE = "Tableau de bord";
 
-type MenuItem = {
-  name: string;
-  path: string;
-  icon: any;
-  danger?: boolean;
-  roles?: string[];
-  permissions?: string[];
-};
-
 export const PROTECTED_MENU: MenuItem[] = [
   { name: "Dashboard", path: "/espace-membre/dashboard", icon: FaHome, permissions: ["stats.dashboard.view"] },
 
@@ -124,8 +116,6 @@ export const OTHER_LINKS = [
 ];
 
 export const PAGE_SIZE = 25;
-
-export type NewsletterTableMode = "all" | "unverified";
 
 export const CONSENT_KEY = "cache_consent";
 export const CONSENT_VERSION = "v1";

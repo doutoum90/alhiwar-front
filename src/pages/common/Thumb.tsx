@@ -1,5 +1,5 @@
 import { FaFilePdf } from "react-icons/fa";
-import { type ArticleMediaDto } from "../../services/articleService";
+import type { ArticleMediaDto } from "../../types";
 import { abs } from "../../utils/url";
 import { Box, Image, } from "@chakra-ui/react";
 

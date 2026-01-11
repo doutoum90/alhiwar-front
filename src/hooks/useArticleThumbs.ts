@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import type { ArticleMediaDto } from "../services/articleService";
-
-type AnyArticle = { id: string | number };
+import type { AnyArticle, ArticleMediaDto } from "../types";
 
 const pickFirstImageFromMedia = (media: ArticleMediaDto[] | undefined | null) => {
   const imgs = (media ?? []).filter((m) => String((m as any)?.type ?? "").toLowerCase() === "image");

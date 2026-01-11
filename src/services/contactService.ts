@@ -1,33 +1,6 @@
 
 import { apiFetch } from "./api";
-
-export interface ContactFormData {
-  message: string;
-  email: string;
-  name: string;
-  subject: string;
-}
-
-export type ContactDto = {
-  id: string;
-  name: string;
-  email: string;
-  subject?: string | null;
-  message: string;
-  isRead: boolean;
-  archivedAt?: string | null;
-  ipAddress?: string | null;
-  userAgent?: string | null;
-  createdAt?: string;
-};
-
-export type Paginated<T> = {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-};
+import type { ContactDto, ContactFormData, Paginated } from "../types";
 
 export const contactService = {
   

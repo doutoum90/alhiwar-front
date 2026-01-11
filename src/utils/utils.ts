@@ -1,8 +1,5 @@
 import { CONSENT_KEY, CONSENT_VERSION } from "../constantes";
-import type { AdStatus, AdType } from "../services/adsService";
-import type { UserMiniDto } from "../services/articleService";
-import type { NotificationsDto } from "../services/profileService";
-import type { CacheConsent, CommentStatus, Paged } from "../types";
+import type { AdStatus, AdType, CacheConsent, CommentStatus, NotificationsDto, Paged, UserMiniDto } from "../types";
 
 export const toNumber = (v: unknown, fallback = 0) => {
     if (v === null || v === undefined) return fallback;
@@ -218,7 +215,8 @@ export const normalizePaged = <T,>(res: any, page: number, limit: number): Paged
     const total = Number(res?.total ?? items.length ?? 0);
     const p = Number(res?.page ?? page);
     const l = Number(res?.limit ?? limit);
-    return { items, total, page: p, limit: l };
+    const pages = Number(res?.pages ?? Math.max(1, Math.ceil(total / l || 1)));
+    return { items, total, page: p, limit: l, pages };
 };
 
 export const formatDateTime = (iso?: string) => {

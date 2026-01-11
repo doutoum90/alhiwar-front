@@ -17,7 +17,8 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
-import { articleService, type UserMiniDto } from "../../services/articleService";
+import { articleService } from "../../services/articleService";
+import type { UserMiniDto } from "../../types";
 import { usersService } from "../../services/userService";
 import { DndContext, PointerSensor, KeyboardSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";

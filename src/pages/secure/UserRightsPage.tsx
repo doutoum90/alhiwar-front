@@ -4,7 +4,8 @@ import {
     Button, useToast, Spinner, useColorModeValue
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
-import { rbacService, type RoleDto } from "../../services/rbacService";
+import { rbacService } from "../../services/rbacService";
+import type { RoleDto } from "../../types";
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function UserRightsPage() {

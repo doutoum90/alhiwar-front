@@ -1,38 +1,6 @@
 
 import { apiFetch } from "./api";
-
-export type CategoryStatus = "draft" | "in_review" | "rejected" | "published" | "archived";
-
-export interface CategoryDto {
-  id: string;
-  name: string;
-  slug?: string | null;
-  description?: string | null;
-  image?: string | null;
-  color?: string | null;
-  status?: CategoryStatus | null;
-  sortOrder?: number | null;
-
-  submittedAt?: string | null;
-  submittedById?: string | null;
-  reviewedAt?: string | null;
-  reviewedById?: string | null;
-  reviewComment?: string | null;
-
-  createdAt?: string;
-  updatedAt?: string;
-  createdById?: string | null;
-}
-
-export interface CategoryCreateDto {
-  name: string;
-  slug?: string | null;
-  description?: string | null;
-  image?: string | null;
-  color?: string | null;
-  sortOrder?: number;
-}
-export type CategoryUpdateDto = Partial<CategoryCreateDto>;
+import type { CategoryCreateDto, CategoryDto, CategoryUpdateDto } from "../types";
 
 const cleanStringOrNull = (v: unknown) => {
   if (v === undefined) return undefined;

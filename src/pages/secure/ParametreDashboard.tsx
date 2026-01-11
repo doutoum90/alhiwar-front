@@ -45,14 +45,14 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 import { FaSave, FaTrash, FaPlus, FaCog, FaServer, FaShieldAlt, FaEnvelope, FaDatabase, FaRedo } from "react-icons/fa";
-import {
-  settingsService,
-  type SystemSettingsDto,
-  type EmailSettingsDto,
-  type SecuritySettingsDto,
-  type ApiKeyDto,
-  type DbStatsDto,
-} from "../../services/settingsService";
+import { settingsService } from "../../services/settingsService";
+import type {
+  ApiKeyDto,
+  DbStatsDto,
+  EmailSettingsDto,
+  SecuritySettingsDto,
+  SystemSettingsDto,
+} from "../../types";
 import { unique, toInt, maskKey } from "../../utils/utils";
 
 const ParametreDashboard = () => {

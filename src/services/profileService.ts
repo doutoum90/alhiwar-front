@@ -1,53 +1,5 @@
 import { apiFetch } from "./api";
-
-export type UserRole = "admin" | "user" | "editor" | string;
-
-export interface NotificationsDto {
-  email: boolean;
-  push: boolean;
-  newsletter: boolean;
-}
-
-export interface ProfileDto {
-  id: string;
-  name: string;
-  email: string;
-  username: string;
-  bio?: string | null;
-  avatar?: string | null;
-  role: UserRole;
-
-  phone?: string | null;
-  location?: string | null;
-  website?: string | null;
-  company?: string | null;
-
-  joinDate?: string | null;
-  lastLogin?: string | null;
-
-  articlesCount?: number | null;
-  followersCount?: number | null;
-  viewsCount?: number | null;
-
-  isEmailVerified?: boolean | null;
-  notifications?: NotificationsDto | null;
-}
-
-export interface UpdateProfileDto {
-  name?: string;
-  username?: string;
-  bio?: string | null;
-  phone?: string | null;
-  location?: string | null;
-  website?: string | null;
-  company?: string | null;
-  avatar?: string | null;
-}
-
-export interface ChangePasswordDto {
-  currentPassword: string;
-  newPassword: string;
-}
+import type { ChangePasswordDto, NotificationsDto, ProfileDto, UpdateProfileDto } from "../types";
 
 const cleanStringOrNull = (v: unknown) => {
   if (v === undefined) return undefined;

@@ -1,14 +1,6 @@
 import { useCallback, useState } from "react";
-import { articleService, type ArticleDto, type ArticleStatus } from "../services/articleService";
-
-export type ArticleEditorForm = {
-    title: string;
-    excerpt: string;
-    contentHtml: string;
-    categoryId: string;
-    tags: string;
-    status: ArticleStatus;
-};
+import { articleService } from "../services/articleService";
+import type { ArticleDto, ArticleEditorForm, ArticleStatus } from "../types";
 
 const getCategoryId = (category: unknown): string => {
     if (!category) return "";

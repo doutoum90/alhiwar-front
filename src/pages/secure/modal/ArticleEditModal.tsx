@@ -28,7 +28,7 @@ import {
   Textarea,
   VStack,
 } from "@chakra-ui/react";
-import type { ArticleStatus } from "../../../services/articleService";
+import type { ArticleStatus } from "../../../types";
 import MediaManagerPro from "../../common/MediaManagerPro";
 import AuthorsPicker from "../../common/AuthorsPicker";
 import CommentsPanel from "../../common/CommentsPanel";

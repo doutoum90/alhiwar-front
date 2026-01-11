@@ -45,7 +45,8 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FaEdit, FaCamera, FaKey, FaTrash, FaUsers, FaNewspaper, FaEye, FaCalendar } from "react-icons/fa";
 import { useAuth } from "../../contexts/AuthContext";
-import { profileService, type ProfileDto, type NotificationsDto } from "../../services/profileService";
+import { profileService } from "../../services/profileService";
+import type { NotificationsDto, ProfileDto } from "../../types";
 import type { EditFormState } from "../../types";
 import { defaultNotifications, roleBadgeColor, roleText, monthsSince } from "../../utils/utils";
 

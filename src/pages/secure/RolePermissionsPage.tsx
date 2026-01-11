@@ -27,7 +27,8 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FaSearch } from "react-icons/fa";
-import { rbacService, type PermissionDto, type RoleDto } from "../../services/rbacService";
+import { rbacService } from "../../services/rbacService";
+import type { PermissionDto, RoleDto } from "../../types";
 
 export default function RolePermissionsPage() {
     const toast = useToast();

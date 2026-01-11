@@ -1,6 +1,5 @@
 
-import type { ArticleStatus } from "../services/articleService";
-import type { CategoryDto } from "../services/categoryService";
+import type { ArticleStatus, CategoryDto, DisplayAuthor } from "../types";
 
 export const formatDate = (iso?: string | null) => {
   if (!iso) return "—";
@@ -37,8 +36,6 @@ export const resolveCategoryLabel = (article: any, categoryMap?: Map<string, str
   return categoryMap?.get(cid) || "—";
 };
 
-
-export type DisplayAuthor = { id: string; name: string; avatar?: string | null; isMain: boolean };
 
 export const getDisplayAuthorsFromArticle = (a: any): DisplayAuthor[] => {
   const links = a?.authors;

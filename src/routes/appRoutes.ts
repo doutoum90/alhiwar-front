@@ -1,5 +1,4 @@
-
-export type GuardRule = { path: string; permissions?: string[]; roles?: string[] };
+import type { GuardRule } from "../types";
 
 export const PRIVATE_ROUTE_RULES: GuardRule[] = [
     { path: "/espace-membre/dashboard", permissions: ["stats.dashboard.view"] },

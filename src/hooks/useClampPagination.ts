@@ -1,6 +1,5 @@
 import { useEffect } from "react";
-
-type SetPage = React.Dispatch<React.SetStateAction<number>>;
+import type { SetPage } from "../types";
 
 
 export function useClampPagination(pages: number, setPage: SetPage) {

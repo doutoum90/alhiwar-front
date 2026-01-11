@@ -33,13 +33,8 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 import { FaUsers, FaNewspaper, FaEye, FaHeart, FaShare, FaComment, FaChartLine, FaMobile, FaDesktop, FaGlobe, FaRedo } from "react-icons/fa";
-import {
-  statsService,
-  type Period,
-  type DashboardStatsDto,
-  type TopAdDto,
-  type AdsByTypeDto,
-} from "../../services/statsService";
+import { statsService } from "../../services/statsService";
+import type { AdsByTypeDto, DashboardStatsDto, Period, TopAdDto } from "../../types";
 
 const StatDashboard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("30");

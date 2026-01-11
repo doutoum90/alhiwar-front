@@ -1,49 +1,6 @@
 
 import { apiFetch } from "./api";
-import type { UserMiniDto } from "./articleService";
-
-export type UserRole = "admin" | "user" | "editor" | string;
-
-
-export type UserStatus = "draft" | "in_review" | "rejected" | "active" | "suspended" | "archived";
-
-export interface UserDto {
-  id: string;
-  name: string;
-  email: string;
-
-  role: UserRole;
-  status: UserStatus;
-
-  avatar?: string | null;
-  lastLogin?: string | null;
-
-  createdAt?: string;
-  updatedAt?: string;
-
-  articlesCount?: number | null;
-  isEmailVerified?: boolean | null;
-
-  
-  submittedAt?: string | null;
-  submittedById?: string | null;
-  reviewedAt?: string | null;
-  reviewedById?: string | null;
-  reviewComment?: string | null;
-
-  createdById?: string | null;
-}
-
-export interface UserCreateDto {
-  name: string;
-  email: string;
-  role?: UserRole;
-  status?: UserStatus; 
-  isEmailVerified?: boolean;
-  avatar?: string | null;
-}
-
-export type UserUpdateDto = Partial<UserCreateDto>;
+import type { UserCreateDto, UserDto, UserMiniDto, UserUpdateDto } from "../types";
 
 const cleanStringOrNull = (v: unknown) => {
   if (v === undefined) return undefined;
