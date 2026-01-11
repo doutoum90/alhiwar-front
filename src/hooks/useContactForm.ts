@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useToast } from "@chakra-ui/react";
 import { contactService } from "../services/contactService";
 import type { ContactFormData } from "../types";
+import { isValidEmail } from "../utils/validation";
 
 const initialFormState: ContactFormData = {
   message: "",
@@ -9,8 +10,6 @@ const initialFormState: ContactFormData = {
   name: "",
   subject: "",
 };
-
-const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 
 export const useContactForm = () => {
   const [formData, setFormData] = useState<ContactFormData>(initialFormState);

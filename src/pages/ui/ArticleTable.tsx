@@ -31,14 +31,14 @@ import {
 
 import type { ArticleDto, ArticleStatus } from "../../types";
 
+import { formatDate } from "../../utils/date";
 import {
-  formatDate,
   getDisplayAuthorsFromArticle,
   getStatusColor,
   getStatusText,
   makeCategoryMap,
   resolveCategoryLabel,
-} from "../../shared/articleUi";
+} from "../../utils/article";
 import type { ArticleTableProps } from "../../types";
 
 export default function ArticleTable({

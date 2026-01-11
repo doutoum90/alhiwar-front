@@ -19,20 +19,7 @@ import {
 import { FaArrowRight, FaBolt, FaRegClock, FaRegImage } from "react-icons/fa";
 import { abs } from "../../utils/url";
 import type { AdDto, UiPost } from "../../types";
-
-export const safeTime = (iso?: string | null) => {
-  if (!iso) return 0;
-  const t = new Date(iso).getTime();
-  return Number.isNaN(t) ? 0 : t;
-};
-
-export const formatDate = (iso?: string | null) => {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString("fr-FR");
-};
-
-
+import { formatDate, safeTime } from "../../utils/date";
 
 export const BREAKING_HOURS = 48;
 

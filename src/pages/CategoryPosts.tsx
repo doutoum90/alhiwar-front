@@ -20,8 +20,10 @@ import { adsService } from "../services/adsService";
 import { categoryService } from "../services/categoryService";
 import type { ArticleDto, AdDto, CategoryDto } from "../types";
 import { useArticleThumbs } from "../hooks/useArticleThumbs";
-import { AdCard, RubriqueSection, safeTime } from "../shared/article/publicUi";
+import { AdCard, RubriqueSection } from "../shared/article/publicUi";
 import type { UiPost } from "../types";
+import { getCategoryLabel } from "../utils/article";
+import { safeTime } from "../utils/date";
 
 const toUiPost = (a: any, imageUrl: string | null): UiPost => ({
   id: String(a.id),
@@ -30,7 +32,7 @@ const toUiPost = (a: any, imageUrl: string | null): UiPost => ({
   imageUrl,
   publishedAt: a.publishedAt ?? a.createdAt ?? null,
   slug: a.slug ?? null,
-  categoryLabel: a?.category?.name ?? a?.categoryName ?? null,
+  categoryLabel: getCategoryLabel(a?.category) || a?.categoryName || null,
   views: a.views ?? null,
 });
 

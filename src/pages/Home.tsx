@@ -24,14 +24,10 @@ import { categoryService } from "../services/categoryService";
 import type { AdDto, ArticleDto, CategoryDto } from "../types";
 
 import { useArticleThumbs } from "../hooks/useArticleThumbs";
-import {
-  AdCard,
-  ArchiveMiniCard,
-  HeroCard,
-  RubriqueSection,
-  safeTime,
-} from "../shared/article/publicUi";
+import { AdCard, ArchiveMiniCard, HeroCard, RubriqueSection } from "../shared/article/publicUi";
 import type { UiPost } from "../types";
+import { getCategoryLabel } from "../utils/article";
+import { safeTime } from "../utils/date";
 import { normalize } from "../utils/utils";
 
 const groupBy = <T, K extends string>(items: T[], keyFn: (i: T) => K) => {
@@ -43,8 +39,6 @@ const groupBy = <T, K extends string>(items: T[], keyFn: (i: T) => K) => {
   return map;
 };
 
-const getCategoryLabel = (a: any): string | null => a?.category?.name ?? a?.categoryName ?? null;
-
 const toUiPost = (a: any, imageUrl: string | null): UiPost => ({
   id: String(a.id),
   title: String(a.title ?? ""),
@@ -52,7 +46,7 @@ const toUiPost = (a: any, imageUrl: string | null): UiPost => ({
   imageUrl,
   publishedAt: a.publishedAt ?? a.createdAt ?? null,
   slug: a.slug ?? null,
-  categoryLabel: getCategoryLabel(a),
+  categoryLabel: getCategoryLabel(a?.category) || a?.categoryName || null,
   views: a.views ?? null,
 });
 

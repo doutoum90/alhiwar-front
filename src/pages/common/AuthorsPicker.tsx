@@ -23,7 +23,8 @@ import { usersService } from "../../services/userService";
 import { DndContext, PointerSensor, KeyboardSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import type { Link } from "../../types";
-import { buildPageItems, normalizePaged, uniqById } from "../../utils/utils";
+import { buildPageItems, normalizePaged } from "../../utils/pagination";
+import { uniqById } from "../../utils/utils";
 import { SelectedAuthorRow } from "./SelectedAuthorRow";
 
 export default function AuthorsPicker({ articleId }: { articleId: string }) {
@@ -36,7 +37,7 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
   const [searchTotal, setSearchTotal] = useState(0);
   const [searchItems, setSearchItems] = useState<UserMiniDto[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
-  const [selected, setSelected] = useState<UserMiniDto[]>([]); 
+  const [selected, setSelected] = useState<UserMiniDto[]>([]);
   const debounceRef = useRef<number | null>(null);
   const resultsTopRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -166,7 +167,7 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
     }
   };
 
-  
+
   const onKeyDownSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!query.trim()) return;
     if (searchLoading) return;
@@ -190,7 +191,7 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
     }
   };
 
-  
+
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
   const onDragEnd = (event: any) => {
@@ -207,7 +208,6 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
 
   return (
     <VStack align="stretch" spacing={4}>
-      {}
       <Card>
         <CardBody>
           <HStack>
@@ -227,7 +227,6 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
         </CardBody>
       </Card>
 
-      {}
       <Card>
         <CardBody>
           <InputGroup>
@@ -243,7 +242,6 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
             />
           </InputGroup>
 
-          {}
           {query.trim() ? (
             <Box mt={3}>
               <Box ref={resultsTopRef} />
@@ -275,7 +273,6 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
                               {u.name ?? (u as any).username ?? "Utilisateur"}
                             </Text>
 
-                            {}
                             {already ? (
                               <Badge colorScheme="purple" variant="subtle">
                                 Déjà auteur
@@ -297,7 +294,6 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
                 </Box>
               )}
 
-              {}
               {!searchLoading && pages > 1 ? (
                 <Flex mt={3} align="center" justify="center" wrap="wrap" gap={2}>
                   <Button
@@ -310,7 +306,7 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
                   </Button>
 
                   {pagesUi.map((p, idx) =>
-                    p === "…" ? (
+                    p.toString() === "…" ? (
                       <Box key={`dots-${idx}`} px={2} color="gray.500">
                         …
                       </Box>
@@ -320,7 +316,7 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
                         size="sm"
                         variant={p === searchPage ? "solid" : "outline"}
                         colorScheme={p === searchPage ? "teal" : "gray"}
-                        onClick={() => setSearchPage(p)}
+                        onClick={() => setSearchPage((p as number))}
                       >
                         {p}
                       </Button>
@@ -348,7 +344,6 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
         </CardBody>
       </Card>
 
-      {}
       <Card>
         <CardBody>
           <HStack mb={3}>

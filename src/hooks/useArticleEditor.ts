@@ -1,13 +1,7 @@
 import { useCallback, useState } from "react";
 import { articleService } from "../services/articleService";
 import type { ArticleDto, ArticleEditorForm, ArticleStatus } from "../types";
-
-const getCategoryId = (category: unknown): string => {
-    if (!category) return "";
-    if (typeof category === "string") return category;
-    if (typeof category === "object") return (category as any)?.id ?? "";
-    return "";
-};
+import { getCategoryId } from "../utils/article";
 
 const stripHtmlToText = (html: string) => {
     const div = document.createElement("div");

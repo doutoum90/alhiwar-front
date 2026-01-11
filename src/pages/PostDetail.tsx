@@ -51,21 +51,14 @@ import { articleService } from "../services/articleService";
 import { abs } from "../utils/url";
 import { newspaperPattern } from "../shared/article/publicUi";
 import type { ArticleDto, ArticleMediaDto, CommentDto, DisplayAuthor, Paged, TocItem } from "../types";
+import { formatDate, formatDateTime } from "../utils/date";
+import { buildPageItems, normalizePaged } from "../utils/pagination";
+import { isValidEmail } from "../utils/validation";
 
 const isUuid = (v: string) =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
-
-const formatDate = (iso?: string | null) => {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString("fr-FR");
-};
-
-const formatDateTime = (iso?: string | null) => {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? "—" : d.toLocaleString("fr-FR");
-};
+
+
 
 const safeNumber = (n: unknown, fallback = 0) => {
   const x = Number(n);
@@ -123,45 +116,8 @@ const scrollToId = (id: string) => {
   window.scrollTo({ top: y, behavior: "smooth" });
 };
 
-
-const buildPageItems = (page: number, pages: number) => {
-  const items: Array<number | "…"> = [];
-  if (pages <= 9) {
-    for (let p = 1; p <= pages; p++) items.push(p);
-    return items;
-  }
-  const add = (p: number | "…") => {
-    if (items.length === 0 || items[items.length - 1] !== p) items.push(p);
-  };
-
-  add(1);
-  const left = Math.max(2, page - 2);
-  const right = Math.min(pages - 1, page + 2);
-
-  if (left > 2) add("…");
-  for (let p = left; p <= right; p++) add(p);
-  if (right < pages - 1) add("…");
-  add(pages);
-
-  return items;
-};
-
-const normalizePaged = <T,>(res: any, fallbackPage: number, fallbackLimit: number): Paged<T> => {
-  if (res && Array.isArray(res.items)) {
-    return {
-      items: res.items as T[],
-      total: Number(res.total ?? 0),
-      page: Number(res.page ?? fallbackPage),
-      limit: Number(res.limit ?? fallbackLimit),
-      pages: Number(res.pages ?? Math.max(1, Math.ceil(Number(res.total ?? 0) / fallbackLimit))),
-    };
-  }
-  if (Array.isArray(res)) {
-    const total = res.length;
-    return { items: res as T[], total, page: 1, limit: total || fallbackLimit, pages: 1 };
-  }
-  return { items: [], total: 0, page: fallbackPage, limit: fallbackLimit, pages: 1 };
-};
+
+
 
 
 const ArticleHtml = ({ html }: { html: string }) => {
@@ -511,8 +467,6 @@ const getDisplayAuthors = (article: ArticleDto): DisplayAuthor[] => {
 
   return [];
 };
-
-const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 export default function PostDetail() {
   const { postId } = useParams<{ postId: string }>();

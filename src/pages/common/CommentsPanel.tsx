@@ -28,7 +28,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { FaEye, FaEyeSlash, FaRedo, FaTrash } from "react-icons/fa";
 import { apiFetch } from "../../services/api";
 import type { CommentDto, CommentStatus, Paged } from "../../types";
-import { buildPageItems, formatDateTime, statusColor, statusLabelComment } from "../../utils/utils";
+import { buildPageItems } from "../../utils/pagination";
+import { formatDateTime } from "../../utils/date";
+import { commentStatusColor, commentStatusLabel } from "../../utils/comment";
 
 export default function CommentsPanel({ articleId }: { articleId: string }) {
   const toast = useToast();
@@ -157,7 +159,6 @@ export default function CommentsPanel({ articleId }: { articleId: string }) {
 
   return (
     <VStack align="stretch" spacing={4}>
-      {}
       <Card>
         <CardBody>
           <HStack wrap="wrap" spacing={3}>
@@ -199,7 +200,6 @@ export default function CommentsPanel({ articleId }: { articleId: string }) {
         </CardBody>
       </Card>
 
-      {}
       <Card>
         <CardBody>
           {loading ? (
@@ -246,8 +246,8 @@ export default function CommentsPanel({ articleId }: { articleId: string }) {
 
                           <Spacer />
 
-                          <Badge colorScheme={statusColor(inferredStatus)} variant="subtle">
-                            {statusLabelComment(inferredStatus)}
+                          <Badge colorScheme={commentStatusColor(inferredStatus)} variant="subtle">
+                            {commentStatusLabel(inferredStatus)}
                           </Badge>
 
                           <Text fontSize="sm" color="gray.500" whiteSpace="nowrap">
@@ -295,7 +295,6 @@ export default function CommentsPanel({ articleId }: { articleId: string }) {
             </Stack>
           )}
 
-          {}
           {!loading && data.pages! > 1 ? (
             <Flex mt={6} align="center" justify="center" wrap="wrap" gap={2}>
               <Button size="sm" variant="outline" onClick={() => setPage(1)} isDisabled={data.page <= 1}>
@@ -352,7 +351,6 @@ export default function CommentsPanel({ articleId }: { articleId: string }) {
         </CardBody>
       </Card>
 
-      {}
       <AlertDialog
         isOpen={confirm.isOpen}
         leastDestructiveRef={cancelRef}

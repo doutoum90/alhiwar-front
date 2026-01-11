@@ -1,25 +1,13 @@
 import { CONSENT_KEY, CONSENT_VERSION } from "../constantes";
-import type { AdStatus, AdType, CacheConsent, CommentStatus, NotificationsDto, Paged, UserMiniDto } from "../types";
+import type { AdStatus, AdType, CacheConsent, CommentStatus, NotificationsDto, UserMiniDto } from "../types";
+export { formatDateTime, toDateInputValue, toIsoOrNullFromDateInput } from "./date";
+export { buildPageItems, normalizePaged } from "./pagination";
 
 export const toNumber = (v: unknown, fallback = 0) => {
     if (v === null || v === undefined) return fallback;
     if (typeof v === "number") return Number.isFinite(v) ? v : fallback;
     const n = Number(String(v).replace(",", "."));
     return Number.isFinite(n) ? n : fallback;
-};
-
-export const toIsoOrNullFromDateInput = (yyyyMmDd: string): string | null => {
-    const s = (yyyyMmDd || "").trim();
-    if (!s) return null;
-    const d = new Date(`${s}T00:00:00.000Z`);
-    return isNaN(d.getTime()) ? null : d.toISOString();
-};
-
-export const toDateInputValue = (iso?: string | null) => {
-    if (!iso) return "";
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return "";
-    return d.toISOString().slice(0, 10);
 };
 
 export const normalizeType = (t: AdType | null | undefined) => {
@@ -188,63 +176,4 @@ export const uniqById = (arr: UserMiniDto[]) => {
     return Array.from(map.values());
 };
 
-export const buildPageItems = (page: number, pages: number) => {
-    const items: Array<number | "…"> = [];
-    if (pages <= 9) {
-        for (let p = 1; p <= pages; p++) items.push(p);
-        return items;
-    }
-    const add = (p: number | "…") => {
-        if (items.length === 0 || items[items.length - 1] !== p) items.push(p);
-    };
 
-    add(1);
-    const left = Math.max(2, page - 2);
-    const right = Math.min(pages - 1, page + 2);
-
-    if (left > 2) add("…");
-    for (let p = left; p <= right; p++) add(p);
-    if (right < pages - 1) add("…");
-    add(pages);
-
-    return items;
-};
-
-export const normalizePaged = <T,>(res: any, page: number, limit: number): Paged<T> => {
-    const items = Array.isArray(res?.items) ? (res.items as T[]) : Array.isArray(res) ? (res as T[]) : [];
-    const total = Number(res?.total ?? items.length ?? 0);
-    const p = Number(res?.page ?? page);
-    const l = Number(res?.limit ?? limit);
-    const pages = Number(res?.pages ?? Math.max(1, Math.ceil(total / l || 1)));
-    return { items, total, page: p, limit: l, pages };
-};
-
-export const formatDateTime = (iso?: string) => {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleString("fr-FR");
-};
-
-export const statusLabelComment = (s: CommentStatus) => {
-  switch (s) {
-    case "visible":
-      return "Visible";
-    case "pending":
-      return "En attente";
-    case "hidden":
-      return "Masqué";
-    default:
-      return s;
-  }
-};
-
-export const safeCount = async <T,>(p: Promise<T[]>): Promise<number> => {
-  try {
-    const res = await p;
-    return Array.isArray(res) ? res.length : 0;
-  } catch (e: any) {
-    if (e?.status === 403) return 0;
-    return 0;
-  }
-};
