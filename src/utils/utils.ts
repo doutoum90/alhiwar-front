@@ -1,5 +1,5 @@
 import { CONSENT_KEY, CONSENT_VERSION } from "../constantes";
-import type { AdStatus, AdType, CacheConsent, CommentStatus, NotificationsDto, UserMiniDto } from "../types";
+import type { AdStatus, AdType, CacheConsent, NotificationsDto, UserMiniDto } from "../types";
 export { formatDateTime, toDateInputValue, toIsoOrNullFromDateInput } from "./date";
 export { buildPageItems, normalizePaged } from "./pagination";
 
@@ -153,7 +153,7 @@ export function getCacheConsent(): CacheConsent | null {
         if (!raw) return null;
         const parsed = JSON.parse(raw) as CacheConsent;
         if (!parsed?.choice || !parsed?.createdAt) return null;
-        if (parsed.version !== CONSENT_VERSION) return null; 
+        if (parsed.version !== CONSENT_VERSION) return null;
         return parsed;
     } catch {
         return null;
@@ -176,4 +176,13 @@ export const uniqById = (arr: UserMiniDto[]) => {
     return Array.from(map.values());
 };
 
+export const safeCount = async <T,>(p: Promise<T[]>): Promise<number> => {
+    try {
+        const res = await p;
+        return Array.isArray(res) ? res.length : 0;
+    } catch (e: any) {
+        if (e?.status === 403) return 0;
+        return 0;
+    }
+};
 

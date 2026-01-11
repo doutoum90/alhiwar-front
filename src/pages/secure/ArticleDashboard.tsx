@@ -94,9 +94,7 @@ export default function ArticleDashboard() {
         articleService.getArticles().catch(() => [] as ArticleDto[]),
         articleService.getReviewQueue().catch(() => [] as ArticleDto[]),
       ]);
-
-      const activeCats = (cats ?? []).filter((c: any) => String(c?.status ?? "active").toLowerCase() === "active");
-
+      const activeCats = (cats ?? []).filter((c: any) => String(c?.status ?? "published").toLowerCase() === "published");
       setCategories(activeCats);
       setArticles(Array.isArray(list) ? list : []);
       setReviewArticles(Array.isArray(queue) ? queue : []);
