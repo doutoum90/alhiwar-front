@@ -12,6 +12,13 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Spinner,
   Tabs,
   Tab,
@@ -20,8 +27,10 @@ import {
   TabPanels,
   Text,
   useColorModeValue,
+  useDisclosure,
   useToast,
   Select,
+  VStack,
 } from "@chakra-ui/react";
 import { FaRedo, FaSearch } from "react-icons/fa";
 import { contactService } from "../../services/contactService";
@@ -30,7 +39,7 @@ import ContactTable from "../ui/ContactTable";
 import FilterBar from "../ui/FilterBar";
 import { useResetPaginationOnChange } from "../../hooks/useResetPaginationOnChange";
 import { useClampPagination } from "../../hooks/useClampPagination";
-import { normalize } from "../../utils/utils";
+import { normalize, toDateLabel } from "../../utils/utils";
 import type { ContactRow } from "../../types";
 
 export default function ContactDashboard() {
@@ -43,6 +52,8 @@ export default function ContactDashboard() {
 
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<ContactRow | null>(null);
+  const details = useDisclosure();
 
   const [tab, setTab] = useState<"all" | "unread">("all");
 
@@ -178,6 +189,23 @@ export default function ContactDashboard() {
       await load();
     });
 
+  const openDetails = (row: ContactRow) => {
+    setSelected(row);
+    details.onOpen();
+  };
+
+  const closeDetails = () => {
+    details.onClose();
+    if (selected && !selected.isRead && !selected.archivedAt) {
+      const id = selected.id;
+      setSelected((prev) => (prev ? { ...prev, isRead: true } : prev));
+      withBusy(id, async () => {
+        await contactService.markContactAsRead(id);
+        await load();
+      });
+    }
+  };
+
   return (
     <Box bg={pageBg} minH="calc(100vh - 120px)" p={{ base: 4, md: 6 }}>
       <Box maxW="7xl" mx="auto">
@@ -247,7 +275,7 @@ export default function ContactDashboard() {
                     </Flex>
                   ) : (
                     <Box overflowX="auto">
-                      <ContactTable mode="all" rows={allRows} busyId={busyId} onMarkRead={onMarkRead} onMarkUnread={onMarkUnread} onDelete={onDelete} />
+                      <ContactTable mode="all" rows={allRows} busyId={busyId} onRowClick={openDetails} onMarkRead={onMarkRead} onMarkUnread={onMarkUnread} onDelete={onDelete} />
                     </Box>
                   )}
                 </TabPanel>
@@ -259,7 +287,7 @@ export default function ContactDashboard() {
                     </Flex>
                   ) : (
                     <Box overflowX="auto">
-                      <ContactTable mode="unread" rows={unreadRows} busyId={busyId} onMarkRead={onMarkRead} onMarkUnread={onMarkUnread} onDelete={onDelete} />
+                      <ContactTable mode="unread" rows={unreadRows} busyId={busyId} onRowClick={openDetails} onMarkRead={onMarkRead} onMarkUnread={onMarkUnread} onDelete={onDelete} />
                     </Box>
                   )}
                 </TabPanel>
@@ -275,7 +303,7 @@ export default function ContactDashboard() {
                 <Button size="sm" onClick={() => setPageAll((p) => Math.max(1, p - 1))} isDisabled={(all?.page ?? 1) <= 1}>
                   Précédent
                 </Button>
-                <Button size="sm" onClick={() => setPageAll((p) => p + 1)} isDisabled={all ? all.page >= all.totalPages : false}>
+                <Button size="sm" onClick={() => setPageAll((p) => p + 1)} isDisabled={all ? all.page >= (all.totalPages ?? 1) : false}>
                   Suivant
                 </Button>
               </HStack>
@@ -287,7 +315,7 @@ export default function ContactDashboard() {
                 <Button size="sm" onClick={() => setPageUnread((p) => Math.max(1, p - 1))} isDisabled={(unread?.page ?? 1) <= 1}>
                   Précédent
                 </Button>
-                <Button size="sm" onClick={() => setPageUnread((p) => p + 1)} isDisabled={unread ? unread.page >= unread.totalPages : false}>
+                <Button size="sm" onClick={() => setPageUnread((p) => p + 1)} isDisabled={unread ? unread.page >= (unread.totalPages ?? 1) : false}>
                   Suivant
                 </Button>
               </HStack>
@@ -295,6 +323,59 @@ export default function ContactDashboard() {
           </CardBody>
         </Card>
       </Box>
+
+      <Modal isOpen={details.isOpen} onClose={closeDetails} size="lg">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Details du message</ModalHeader>
+          <ModalCloseButton />
+    <ModalBody>
+      {selected ? (
+        <VStack align="start" spacing={3}>
+          <Box>
+            <Text fontWeight="semibold">{selected.name || "N/A"}</Text>
+            <Text color="gray.600">{selected.email || "N/A"}</Text>
+          </Box>
+
+          <Box>
+            <Text fontSize="sm" color="gray.500">Sujet</Text>
+            <Text>{selected.subject || "N/A"}</Text>
+          </Box>
+
+          <Box>
+            <Text fontSize="sm" color="gray.500">Message</Text>
+            <Text whiteSpace="pre-wrap">{selected.message || "N/A"}</Text>
+          </Box>
+
+          <HStack>
+            {selected.archivedAt ? (
+              <Badge colorScheme="purple">Archive</Badge>
+            ) : selected.isRead ? (
+              <Badge colorScheme="green">Lu</Badge>
+            ) : (
+              <Badge colorScheme="red">Non lu</Badge>
+            )}
+            <Text fontSize="sm" color="gray.500">
+              {toDateLabel(selected.createdAt ?? null)}
+            </Text>
+          </HStack>
+
+          {selected.archivedAt ? (
+            <Text fontSize="sm" color="gray.500">
+              Archive le {toDateLabel(selected.archivedAt)}
+            </Text>
+          ) : null}
+        </VStack>
+      ) : null}
+    </ModalBody>
+    <ModalFooter>
+            <Button variant="ghost" onClick={closeDetails}>
+              Fermer
+            </Button>
+    </ModalFooter>
+  </ModalContent>
+</Modal>
     </Box>
   );
 }
+

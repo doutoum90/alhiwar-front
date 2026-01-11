@@ -636,6 +636,7 @@ export type ContactTableProps = {
   mode: ContactTableMode;
   rows: ContactRow[];
   busyId?: string | null;
+  onRowClick?: (row: ContactRow) => void;
 
   onMarkRead?: (row: ContactRow) => void;
   onMarkUnread?: (row: ContactRow) => void;
@@ -660,6 +661,7 @@ export type NewsletterProps = {
   mode: NewsletterTableMode;
   rows: NewsletterRow[];
   busyId?: string | null;
+  onRowClick?: (row: NewsletterRow) => void;
 
   onDelete?: (row: NewsletterRow) => void;
   onToggleActive?: (row: NewsletterRow, value: boolean) => void;

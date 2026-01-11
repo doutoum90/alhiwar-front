@@ -1,4 +1,5 @@
 
+import type { MouseEvent } from "react";
 import {
   Badge,
   Flex,
@@ -25,10 +26,12 @@ export default function NewsletterTable({
   mode,
   rows,
   busyId,
+  onRowClick,
   onDelete,
   onToggleActive,
   onToggleVerified,
 }: NewsletterProps) {
+  const stop = (e: MouseEvent) => e.stopPropagation();
   return (
     <Table variant="simple">
       <Thead>
@@ -46,7 +49,7 @@ export default function NewsletterTable({
           const isBusy = busyId === r.id;
 
           return (
-            <Tr key={r.id}>
+            <Tr key={r.id} onClick={() => onRowClick?.(r)} cursor={onRowClick ? "pointer" : "default"}>
               <Td>
                 <VStack align="start" spacing={0}>
                   <Text fontWeight="semibold">{r.email}</Text>
@@ -60,6 +63,7 @@ export default function NewsletterTable({
                 <Switch
                   isChecked={Boolean(r.isActive)}
                   onChange={(e) => onToggleActive?.(r, e.target.checked)}
+                  onClick={stop}
                   isDisabled={!onToggleActive || isBusy}
                 />
               </Td>
@@ -68,6 +72,7 @@ export default function NewsletterTable({
                 <Switch
                   isChecked={Boolean(r.isVerified)}
                   onChange={(e) => onToggleVerified?.(r, e.target.checked)}
+                  onClick={stop}
                   isDisabled={!onToggleVerified || isBusy}
                 />
               </Td>
@@ -88,11 +93,15 @@ export default function NewsletterTable({
                       size="sm"
                       aria-label="Actions"
                       isDisabled={isBusy}
+                      onClick={stop}
                     />
                     <MenuList>
                       <MenuItem
                         icon={<FaTrash />}
-                        onClick={() => onDelete?.(r)}
+                        onClick={(e) => {
+                          stop(e);
+                          onDelete?.(r);
+                        }}
                         color="red.500"
                         isDisabled={!onDelete}
                       >

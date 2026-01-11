@@ -1,4 +1,5 @@
 
+import type { MouseEvent } from "react";
 import {
   Badge,
   Flex,
@@ -25,10 +26,12 @@ export default function ContactTable({
   mode,
   rows,
   busyId,
+  onRowClick,
   onMarkRead,
   onMarkUnread,
   onDelete,
 }: ContactTableProps) {
+  const stop = (e: MouseEvent) => e.stopPropagation();
   return (
     <Table variant="simple">
       <Thead>
@@ -47,7 +50,7 @@ export default function ContactTable({
           const isBusy = busyId === r.id;
 
           return (
-            <Tr key={r.id} opacity={r.archivedAt ? 0.6 : 1}>
+            <Tr key={r.id} opacity={r.archivedAt ? 0.6 : 1} onClick={() => onRowClick?.(r)} cursor={onRowClick ? "pointer" : "default"}>
               <Td>
                 <VStack align="start" spacing={0}>
                   <Text fontWeight="semibold">{r.name || "—"}</Text>
@@ -93,11 +96,15 @@ export default function ContactTable({
                       size="sm"
                       aria-label="Actions"
                       isDisabled={isBusy}
+                      onClick={stop}
                     />
                     <MenuList>
                       <MenuItem
                         icon={<FaCheck />}
-                        onClick={() => onMarkRead?.(r)}
+                        onClick={(e) => {
+                          stop(e);
+                          onMarkRead?.(r);
+                        }}
                         isDisabled={!onMarkRead || r.isRead || Boolean(r.archivedAt)}
                       >
                         Marquer comme lu
@@ -105,7 +112,10 @@ export default function ContactTable({
 
                       <MenuItem
                         icon={<FaTimes />}
-                        onClick={() => onMarkUnread?.(r)}
+                        onClick={(e) => {
+                          stop(e);
+                          onMarkUnread?.(r);
+                        }}
                         isDisabled={!onMarkUnread || !r.isRead || Boolean(r.archivedAt)}
                       >
                         Marquer comme non lu
@@ -113,7 +123,10 @@ export default function ContactTable({
 
                       <MenuItem
                         icon={<FaTrash />}
-                        onClick={() => onDelete?.(r)}
+                        onClick={(e) => {
+                          stop(e);
+                          onDelete?.(r);
+                        }}
                         color="red.500"
                         isDisabled={!onDelete}
                       >
@@ -131,7 +144,10 @@ export default function ContactTable({
                       variant="outline"
                       colorScheme="green"
                       icon={<FaCheck />}
-                      onClick={() => onMarkRead?.(r)}
+                      onClick={(e) => {
+                        stop(e);
+                        onMarkRead?.(r);
+                      }}
                       isDisabled={!onMarkRead || r.isRead || isBusy}
                       isLoading={isBusy}
                     />
@@ -141,7 +157,10 @@ export default function ContactTable({
                       variant="outline"
                       colorScheme="red"
                       icon={<FaTrash />}
-                      onClick={() => onDelete?.(r)}
+                      onClick={(e) => {
+                        stop(e);
+                        onDelete?.(r);
+                      }}
                       isDisabled={!onDelete || isBusy}
                     />
                   </HStack>

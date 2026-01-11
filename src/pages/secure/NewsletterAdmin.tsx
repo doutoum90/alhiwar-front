@@ -12,6 +12,13 @@ import {
     Input,
     InputGroup,
     InputLeftElement,
+    Modal,
+    ModalBody,
+    ModalCloseButton,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    ModalOverlay,
     Spinner,
     Tab,
     TabList,
@@ -20,9 +27,11 @@ import {
     Tabs,
     Text,
     useColorModeValue,
+    useDisclosure,
     useToast,
     Select,
     SimpleGrid,
+    VStack,
 } from "@chakra-ui/react";
 import { FaRedo, FaSearch } from "react-icons/fa";
 import { newsletterService } from "../../services/newsletterService";
@@ -31,11 +40,19 @@ import NewsletterTable from "../ui/NewsletterTable";
 import FilterBar from "../ui/FilterBar";
 import { useResetPaginationOnChange } from "../../hooks/useResetPaginationOnChange";
 import { useClampPagination } from "../../hooks/useClampPagination";
-import { normalize } from "../../utils/utils";
+import { normalize, toDateLabel } from "../../utils/utils";
 import type { NewsletterRow } from "../../types";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function NewsletterAdmin() {
     const toast = useToast();
+    const details = useDisclosure();
+    const { user } = useAuth();
+    const isPrivileged = useMemo(() => {
+        const role = normalize(user?.role ?? "");
+        const roles = (user?.roles ?? []).map((r) => normalize(r));
+        return role === "admin" || role === "editor" || roles.includes("admin") || roles.includes("editor");
+    }, [user]);
 
     const pageBg = useColorModeValue("gray.50", "gray.900");
     const cardBg = useColorModeValue("white", "gray.800");
@@ -44,6 +61,7 @@ export default function NewsletterAdmin() {
 
     const [loading, setLoading] = useState(true);
     const [busyId, setBusyId] = useState<string | null>(null);
+    const [selected, setSelected] = useState<NewsletterRow | null>(null);
 
     const [tab, setTab] = useState<"all" | "unverified">("all");
 
@@ -74,6 +92,11 @@ export default function NewsletterAdmin() {
     const load = useCallback(async () => {
         setLoading(true);
         try {
+            if (!isPrivileged) {
+                setAll({ items: [], total: 0, page: 1, limit, pages: 1 } as any);
+                setAllUnverifiedCount(0);
+                return;
+            }
             const params = new URLSearchParams();
             params.set("page", String(pageAll));
             params.set("limit", String(limit));
@@ -95,7 +118,7 @@ export default function NewsletterAdmin() {
         } finally {
             setLoading(false);
         }
-    }, [toast, q, pageAll]);
+    }, [toast, q, pageAll, isPrivileged]);
 
     useEffect(() => {
         load();
@@ -169,11 +192,21 @@ export default function NewsletterAdmin() {
 
     const onDelete = (row: NewsletterRow) =>
         withBusy(row.id, async () => {
-            if (!window.confirm("Supprimer cet abonné ?")) return;
+            if (!window.confirm("Supprimer cet abonnǸ ?")) return;
             await newsletterService.deleteSubscriber(row.id);
-            toastOk("Supprimé");
+            toastOk("SupprimǸ");
             await load();
         });
+
+    const openDetails = (row: NewsletterRow) => {
+        setSelected(row);
+        details.onOpen();
+    };
+
+    const closeDetails = () => {
+        setSelected(null);
+        details.onClose();
+    };
 
     return (
         <Box bg={pageBg} minH="calc(100vh - 120px)" p={{ base: 4, md: 6 }}>
@@ -189,7 +222,7 @@ export default function NewsletterAdmin() {
                             </Box>
 
                             <HStack>
-                                <Button leftIcon={<FaRedo />} variant="outline" onClick={load} isDisabled={loading}>
+                                <Button leftIcon={<FaRedo />} variant="outline" onClick={load} isDisabled={loading || !isPrivileged}>
                                     Rafraîchir
                                 </Button>
                             </HStack>
@@ -260,9 +293,10 @@ export default function NewsletterAdmin() {
                                                 mode="all"
                                                 rows={allRows}
                                                 busyId={busyId}
-                                                onToggleActive={onToggleActive}
-                                                onToggleVerified={onToggleVerified}
-                                                onDelete={onDelete}
+                                                onRowClick={openDetails}
+                                                onToggleActive={isPrivileged ? onToggleActive : undefined}
+                                                onToggleVerified={isPrivileged ? onToggleVerified : undefined}
+                                                onDelete={isPrivileged ? onDelete : undefined}
                                             />
                                         </Box>
                                     )}
@@ -276,7 +310,7 @@ export default function NewsletterAdmin() {
                                             <Button size="sm" onClick={() => setPageAll((p) => Math.max(1, p - 1))} isDisabled={(all?.page ?? 1) <= 1}>
                                                 Précédent
                                             </Button>
-                                            <Button size="sm" onClick={() => setPageAll((p) => p + 1)} isDisabled={all ? all.page >= all.pages : false}>
+                                            <Button size="sm" onClick={() => setPageAll((p) => p + 1)} isDisabled={all ? all.page >= (all.pages || 0) : false}>
                                                 Suivant
                                             </Button>
                                         </HStack>
@@ -294,9 +328,10 @@ export default function NewsletterAdmin() {
                                                 mode="unverified"
                                                 rows={unverifiedRows}
                                                 busyId={busyId}
-                                                onToggleActive={onToggleActive}
-                                                onToggleVerified={onToggleVerified}
-                                                onDelete={onDelete}
+                                                onRowClick={openDetails}
+                                                onToggleActive={isPrivileged ? onToggleActive : undefined}
+                                                onToggleVerified={isPrivileged ? onToggleVerified : undefined}
+                                                onDelete={isPrivileged ? onDelete : undefined}
                                             />
                                         </Box>
                                     )}
@@ -318,9 +353,45 @@ export default function NewsletterAdmin() {
                                 </TabPanel>
                             </TabPanels>
                         </Tabs>
+
+                        <Modal isOpen={details.isOpen} onClose={closeDetails} size="md">
+                            <ModalOverlay />
+                            <ModalContent>
+                                <ModalHeader>Details abonnement</ModalHeader>
+                                <ModalCloseButton />
+                                <ModalBody>
+                                    {selected ? (
+                                        <VStack align="start" spacing={3}>
+                                            <Box>
+                                                <Text fontWeight="semibold">{selected.email || "N/A"}</Text>
+                                                <Text fontSize="sm" color="gray.500">
+                                                    {toDateLabel(selected.createdAt ?? null)}
+                                                </Text>
+                                            </Box>
+
+                                            <HStack>
+                                                <Badge colorScheme={selected.isActive ? "green" : "gray"}>
+                                                    {selected.isActive ? "Actif" : "Inactif"}
+                                                </Badge>
+                                                <Badge colorScheme={selected.isVerified ? "green" : "red"}>
+                                                    {selected.isVerified ? "Verifie" : "Non verifie"}
+                                                </Badge>
+                                            </HStack>
+                                        </VStack>
+                                    ) : null}
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button variant="ghost" onClick={closeDetails}>
+                                        Fermer
+                                    </Button>
+                                </ModalFooter>
+                            </ModalContent>
+                        </Modal>
                     </CardBody>
                 </Card>
             </Box>
         </Box>
     );
 }
+
+
