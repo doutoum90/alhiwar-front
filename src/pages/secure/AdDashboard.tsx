@@ -61,7 +61,7 @@ import {
   Th,
   Thead,
 } from "@chakra-ui/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   FaArchive,
   FaChartLine,
@@ -85,8 +85,9 @@ import { EmptyRow } from "../ui/EmptyRow";
 import FilterBar from "../ui/FilterBar";
 import { useResetPaginationOnChange } from "../../hooks/useResetPaginationOnChange";
 import { useClampPagination } from "../../hooks/useClampPagination";
-import { normalizeType, toNumber, ctrPercent, toDateInputValue, toIsoOrNullFromDateInput, typeLabel, workflowColor, workflowLabel } from "../../utils/utils";
+import { normalize, normalizeType, toNumber, ctrPercent, toDateInputValue, toIsoOrNullFromDateInput, typeLabel, workflowColor, workflowLabel } from "../../utils/utils";
 import { PAGE_SIZE } from "../../constantes";
+import { useAuth } from "../../contexts/AuthContext";
 
 const AdDashboard = () => {
   const toast = useToast();
@@ -95,6 +96,21 @@ const AdDashboard = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
   const { isOpen: isRejectOpen, onOpen: onRejectOpen, onClose: onRejectClose } = useDisclosure();
+
+  const { user } = useAuth();
+  const userId = useMemo(() => (user?.userId ? String(user.userId) : ""), [user]);
+  const isPrivileged = useMemo(() => {
+    const role = normalize(user?.role ?? "");
+    const roles = (user?.roles ?? []).map((r) => normalize(r));
+    return role === "admin" || role === "editor" || roles.includes("admin") || roles.includes("editor");
+  }, [user]);
+  const isJournalist = useMemo(() => {
+    const role = normalize(user?.role ?? "");
+    const roles = (user?.roles ?? []).map((r) => normalize(r));
+    return role === "journalist" || roles.includes("journalist");
+  }, [user]);
+  const canReview = isPrivileged;
+  const canCreate = isPrivileged || isJournalist;
 
   const [rejectComment, setRejectComment] = useState("");
 
@@ -142,7 +158,7 @@ const AdDashboard = () => {
     try {
       const [list, rq] = await Promise.all([
         adsService.getAds().catch(() => [] as AdDto[]),
-        adsService.getReviewQueue().catch(() => [] as AdDto[]),
+        canReview ? adsService.getReviewQueue().catch(() => [] as AdDto[]) : Promise.resolve([] as AdDto[]),
       ]);
       setAds(Array.isArray(list) ? list : []);
       setReviewAds(Array.isArray(rq) ? rq : []);
@@ -167,16 +183,46 @@ const AdDashboard = () => {
 
   useEffect(() => {
     loadAll();
-  }, []);
+  }, [canReview]);
+
+  const isUserAd = useCallback(
+    (ad: AdDto) => {
+      if (!userId) return false;
+      const createdById = String((ad as any).createdById ?? "");
+      if (createdById && createdById === userId) return true;
+      const submittedById = String((ad as any).submittedById ?? "");
+      if (submittedById && submittedById === userId) return true;
+      return false;
+    },
+    [userId]
+  );
+
+  const canActAd = useCallback(
+    (ad: AdDto, action: "edit" | "delete" | "submit" | "approve" | "reject" | "archive") => {
+      if (isPrivileged) return true;
+      if (!isJournalist) return false;
+      if (!isUserAd(ad)) return false;
+
+      const s = String(ad.status ?? "").toLowerCase();
+      if (action === "edit" || action === "submit") return s === "draft" || s === "rejected";
+      return false;
+    },
+    [isPrivileged, isJournalist, isUserAd]
+  );
 
   useResetPaginationOnChange([searchTerm, filterStatus, filterType], () => {
     setPageAll(1);
     setPageReview(1);
   });
 
+  useEffect(() => {
+    if (canReview) return;
+    if (filterStatus === "in_review") setFilterStatus("all");
+  }, [canReview, filterStatus]);
+
   const filteredAds = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
-    return ads.filter((ad) => {
+    const base = ads.filter((ad) => {
       const t = normalizeType(ad.type);
       const s = String(ad.status ?? "draft") as AdWorkflowStatus;
 
@@ -188,9 +234,12 @@ const AdDashboard = () => {
 
       return matchesSearch && matchesStatus && matchesType;
     });
-  }, [ads, searchTerm, filterStatus, filterType]);
+    if (canReview) return base;
+    return base.filter((ad) => String(ad.status ?? "").toLowerCase() !== "in_review" && isUserAd(ad));
+  }, [ads, searchTerm, filterStatus, filterType, canReview, isUserAd]);
 
   const filteredReviewAds = useMemo(() => {
+    if (!canReview) return [];
     const q = searchTerm.trim().toLowerCase();
     return reviewAds.filter((ad) => {
       const t = normalizeType(ad.type);
@@ -204,7 +253,7 @@ const AdDashboard = () => {
 
       return matchesSearch && matchesStatus && matchesType;
     });
-  }, [reviewAds, searchTerm, filterStatus, filterType]);
+  }, [reviewAds, searchTerm, filterStatus, filterType, canReview]);
 
   const pagesAll = useMemo(() => Math.max(1, Math.ceil(filteredAds.length / PAGE_SIZE)), [filteredAds.length]);
   const pagesReview = useMemo(() => Math.max(1, Math.ceil(filteredReviewAds.length / PAGE_SIZE)), [filteredReviewAds.length]);
@@ -231,6 +280,7 @@ const AdDashboard = () => {
   }, [ads]);
 
   const openCreate = () => {
+    if (!canCreate) return;
     setSelectedAd(null);
     setFormData({
       title: "",
@@ -248,6 +298,7 @@ const AdDashboard = () => {
   };
 
   const openEdit = (ad: AdDto) => {
+    if (!canActAd(ad, "edit")) return;
     setSelectedAd(ad);
     setFormData({
       title: ad.title || "",
@@ -265,11 +316,17 @@ const AdDashboard = () => {
   };
 
   const confirmDelete = (ad: AdDto) => {
+    if (!canActAd(ad, "delete")) return;
     setSelectedAd(ad);
     onDeleteOpen();
   };
 
   const handleSave = async () => {
+    if (selectedAd?.id) {
+      if (!canActAd(selectedAd, "edit")) return;
+    } else if (!canCreate) {
+      return;
+    }
     if (!formData.title.trim() || !formData.content.trim()) {
       toast({
         title: "Champs requis",
@@ -317,6 +374,7 @@ const AdDashboard = () => {
 
   const handleDelete = async () => {
     if (!selectedAd?.id) return;
+    if (!canActAd(selectedAd, "delete")) return;
     setSaving(true);
     try {
       await adsService.deleteAd(selectedAd.id);
@@ -337,6 +395,7 @@ const AdDashboard = () => {
   };
 
   const submitForReview = async (ad: AdDto) => {
+    if (!canActAd(ad, "submit")) return;
     try {
       await adsService.submitForReview(ad.id);
       toast({ title: "Envoyée en revue", status: "success", duration: 2500, isClosable: true });
@@ -353,6 +412,7 @@ const AdDashboard = () => {
   };
 
   const approve = async (ad: AdDto) => {
+    if (!canActAd(ad, "approve")) return;
     try {
       await adsService.approve(ad.id);
       toast({ title: "Publicité approuvée (publiée)", status: "success", duration: 2500, isClosable: true });
@@ -369,6 +429,7 @@ const AdDashboard = () => {
   };
 
   const openReject = (ad: AdDto) => {
+    if (!canActAd(ad, "reject")) return;
     setSelectedAd(ad);
     setRejectComment("");
     onRejectOpen();
@@ -376,6 +437,7 @@ const AdDashboard = () => {
 
   const confirmReject = async () => {
     if (!selectedAd?.id) return;
+    if (!canActAd(selectedAd, "reject")) return;
     try {
       await adsService.reject(selectedAd.id, rejectComment || "Rejetée");
       toast({ title: "Publicité rejetée", status: "info", duration: 2500, isClosable: true });
@@ -393,6 +455,7 @@ const AdDashboard = () => {
   };
 
   const archive = async (ad: AdDto) => {
+    if (!canActAd(ad, "archive")) return;
     try {
       await adsService.archive(ad.id);
       toast({ title: "Publicité archivée", status: "success", duration: 2500, isClosable: true });
@@ -415,6 +478,12 @@ const AdDashboard = () => {
     const impressions = toNumber((ad as any).impressions, 0);
     const clicks = toNumber((ad as any).clicks, 0);
     const ctr = ctrPercent(clicks, impressions);
+    const canEdit = canActAd(ad, "edit");
+    const canDelete = canActAd(ad, "delete");
+    const canSubmit = canActAd(ad, "submit");
+    const canApprove = canActAd(ad, "approve");
+    const canReject = canActAd(ad, "reject");
+    const canArchive = canActAd(ad, "archive");
 
     return (
       <Tr key={ad.id}>
@@ -469,42 +538,42 @@ const AdDashboard = () => {
               {actionsVariant === "all" ? (
                 <>
                   {s === "draft" || s === "rejected" ? (
-                    <MenuItem icon={<FaPaperPlane />} onClick={() => submitForReview(ad)}>
+                    <MenuItem icon={<FaPaperPlane />} onClick={() => submitForReview(ad)} isDisabled={!canSubmit}>
                       Envoyer en revue
                     </MenuItem>
                   ) : null}
 
                   {s === "in_review" ? (
                     <>
-                      <MenuItem icon={<FaCheck />} onClick={() => approve(ad)}>
+                      <MenuItem icon={<FaCheck />} onClick={() => approve(ad)} isDisabled={!canApprove}>
                         Approuver (publier)
                       </MenuItem>
-                      <MenuItem icon={<FaTimes />} onClick={() => openReject(ad)} color="red.500">
+                      <MenuItem icon={<FaTimes />} onClick={() => openReject(ad)} color="red.500" isDisabled={!canReject}>
                         Rejeter
                       </MenuItem>
                     </>
                   ) : null}
 
                   {s === "published" ? (
-                    <MenuItem icon={<FaArchive />} onClick={() => archive(ad)}>
+                    <MenuItem icon={<FaArchive />} onClick={() => archive(ad)} isDisabled={!canArchive}>
                       Archiver
                     </MenuItem>
                   ) : null}
 
-                  <MenuItem icon={<FaEdit />} onClick={() => openEdit(ad)} isDisabled={s === "archived"}>
+                  <MenuItem icon={<FaEdit />} onClick={() => openEdit(ad)} isDisabled={s === "archived" || !canEdit}>
                     Modifier
                   </MenuItem>
 
-                  <MenuItem icon={<FaTrash />} onClick={() => confirmDelete(ad)} color="red.500">
+                  <MenuItem icon={<FaTrash />} onClick={() => confirmDelete(ad)} color="red.500" isDisabled={!canDelete}>
                     Supprimer
                   </MenuItem>
                 </>
               ) : (
                 <>
-                  <MenuItem icon={<FaCheck />} onClick={() => approve(ad)}>
+                  <MenuItem icon={<FaCheck />} onClick={() => approve(ad)} isDisabled={!canApprove}>
                     Approuver (publier)
                   </MenuItem>
-                  <MenuItem icon={<FaTimes />} onClick={() => openReject(ad)} color="red.500">
+                  <MenuItem icon={<FaTimes />} onClick={() => openReject(ad)} color="red.500" isDisabled={!canReject}>
                     Rejeter
                   </MenuItem>
                 </>
@@ -521,7 +590,7 @@ const AdDashboard = () => {
       <Flex justify="space-between" align="center" mb={6} gap={3} wrap="wrap">
         <Heading size="lg">Gestion des Publicités</Heading>
         <HStack spacing={3}>
-          <Button leftIcon={<FaPlus />} colorScheme="teal" onClick={openCreate}>
+          <Button leftIcon={<FaPlus />} colorScheme="teal" onClick={openCreate} isDisabled={!canCreate}>
             Nouvelle Publicité
           </Button>
           <Button leftIcon={<FaRedo />} variant="outline" onClick={loadAll} isDisabled={loading}>
@@ -593,18 +662,20 @@ const AdDashboard = () => {
       <Tabs isFitted variant="enclosed" colorScheme="teal">
         <TabList mb="1em">
           <Tab>Toutes</Tab>
-          <Tab>
-            En revue{" "}
-            {reviewAds.length > 0 ? (
-              <Badge ml={2} colorScheme="blue" borderRadius="full">
-                {reviewAds.length}
-              </Badge>
-            ) : null}
-          </Tab>
+          {canReview ? (
+            <Tab>
+              En revue{" "}
+              {reviewAds.length > 0 ? (
+                <Badge ml={2} colorScheme="blue" borderRadius="full">
+                  {reviewAds.length}
+                </Badge>
+              ) : null}
+            </Tab>
+          ) : null}
         </TabList>
 
         <TabPanels>
-          {}
+          {canReview ? (
           <TabPanel p={0}>
             <FilterBar
               left={
@@ -627,7 +698,7 @@ const AdDashboard = () => {
                   >
                     <option value="all">Tous les statuts</option>
                     <option value="draft">Brouillon</option>
-                    <option value="in_review">En revue</option>
+                    {canReview ? <option value="in_review">En revue</option> : null}
                     <option value="rejected">Rejetée</option>
                     <option value="published">Publiée</option>
                     <option value="archived">Archivée</option>
@@ -691,8 +762,9 @@ const AdDashboard = () => {
               </CardBody>
             </Card>
           </TabPanel>
+          ) : null}
 
-          {}
+          { }
           <TabPanel p={0}>
             <FilterBar
               left={
@@ -712,7 +784,7 @@ const AdDashboard = () => {
                   <Select maxW="220px" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as any)}>
                     <option value="all">Tous les statuts</option>
                     <option value="draft">Brouillon</option>
-                    <option value="in_review">En revue</option>
+                    {canReview ? <option value="in_review">En revue</option> : null}
                     <option value="rejected">Rejetée</option>
                     <option value="published">Publiée</option>
                     <option value="archived">Archivée</option>
@@ -777,7 +849,7 @@ const AdDashboard = () => {
         </TabPanels>
       </Tabs>
 
-      {}
+      { }
       <Modal isOpen={isOpen} onClose={saving ? () => { } : onClose} size="xl">
         <ModalOverlay />
         <ModalContent>
@@ -894,7 +966,7 @@ const AdDashboard = () => {
         </ModalContent>
       </Modal>
 
-      {}
+      { }
       <Modal isOpen={isRejectOpen} onClose={onRejectClose} size="lg">
         <ModalOverlay />
         <ModalContent>
@@ -922,7 +994,7 @@ const AdDashboard = () => {
         </ModalContent>
       </Modal>
 
-      {}
+      { }
       <AlertDialog isOpen={isDeleteOpen} leastDestructiveRef={cancelRef} onClose={onDeleteClose}>
         <AlertDialogOverlay>
           <AlertDialogContent>
@@ -944,3 +1016,6 @@ const AdDashboard = () => {
 };
 
 export default AdDashboard;
+
+
+

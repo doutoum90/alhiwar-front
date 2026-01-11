@@ -36,9 +36,18 @@ import FilterBar from "../ui/FilterBar";
 import { usersService } from "../../services/userService";
 import type { UserDto } from "../../types";
 import { normalize, roleLabel, statusColor, statusLabel } from "../../utils/utils";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function UserDashboard() {
   const toast = useToast();
+  const { user } = useAuth();
+  const isPrivileged = useMemo(() => {
+    const role = normalize(user?.role ?? "");
+    const roles = (user?.roles ?? []).map((r) => normalize(r));
+    return role === "admin" || role === "editor" || roles.includes("admin") || roles.includes("editor");
+  }, [user]);
+  const userId = useMemo(() => (user?.userId ? String(user.userId) : ""), [user]);
+  const userEmail = useMemo(() => normalize(user?.email ?? ""), [user]);
 
   const pageBg = useColorModeValue("gray.50", "gray.900");
   const cardBg = useColorModeValue("white", "gray.800");
@@ -48,7 +57,7 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<UserDto[]>([]);
 
-  
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState<"all" | "admin" | "editor" | "user">("all");
   const [filterStatus, setFilterStatus] = useState<"all" | "active" | "inactive" | "suspended">("all");
@@ -73,7 +82,7 @@ export default function UserDashboard() {
 
   useEffect(() => {
     loadAll();
-    
+
   }, []);
 
   const filtered = useMemo(() => {
@@ -84,24 +93,30 @@ export default function UserDashboard() {
       const email = normalize(String(u.email ?? ""));
       const role = normalize(String(u.role ?? ""));
       const status = normalize(String(u.status ?? ""));
+      const id = String(u.id ?? "");
+      const isSelf = (userId && id === userId) || (userEmail && email === userEmail);
 
       const matchesSearch = !q || name.includes(q) || email.includes(q) || role.includes(q) || status.includes(q);
       const matchesRole = filterRole === "all" ? true : role === filterRole;
       const matchesStatus = filterStatus === "all" ? true : status === filterStatus;
+      const matchesOwner = isPrivileged ? true : isSelf;
 
-      return matchesSearch && matchesRole && matchesStatus;
+      return matchesSearch && matchesRole && matchesStatus && matchesOwner;
     });
-  }, [users, searchTerm, filterRole, filterStatus]);
+  }, [users, searchTerm, filterRole, filterStatus, isPrivileged, userId, userEmail]);
 
   const onCreate = () => {
+    if (!isPrivileged) return;
     toast({ title: "TODO: Create user", status: "info", duration: 2000, isClosable: true });
   };
 
   const onEdit = (u: UserDto) => {
+    if (!isPrivileged) return;
     toast({ title: `TODO: Edit ${u.email}`, status: "info", duration: 2000, isClosable: true });
   };
 
   const onDisable = async (u: UserDto) => {
+    if (!isPrivileged) return;
     toast({ title: `TODO: Disable ${u.email}`, status: "info", duration: 2000, isClosable: true });
   };
 
@@ -119,7 +134,7 @@ export default function UserDashboard() {
               </Box>
 
               <HStack>
-                <Button leftIcon={<FaPlus />} colorScheme="teal" onClick={onCreate}>
+                <Button leftIcon={<FaPlus />} colorScheme="teal" onClick={onCreate} isDisabled={!isPrivileged}>
                   Nouvel utilisateur
                 </Button>
                 <Button leftIcon={<FaRedo />} variant="outline" onClick={loadAll} isDisabled={loading}>
@@ -130,7 +145,7 @@ export default function UserDashboard() {
 
             <Divider my={5} />
 
-            {}
+            { }
             <FilterBar
               mb={5}
               left={
@@ -215,8 +230,8 @@ export default function UserDashboard() {
                                     aria-label="Actions"
                                   />
                                   <MenuList>
-                                    <MenuItem onClick={() => onEdit(u)}>Modifier</MenuItem>
-                                    <MenuItem onClick={() => onDisable(u)} color="red.500">
+                                    <MenuItem onClick={() => onEdit(u)} isDisabled={!isPrivileged}>Modifier</MenuItem>
+                                    <MenuItem onClick={() => onDisable(u)} color="red.500" isDisabled={!isPrivileged}>
                                       Désactiver
                                     </MenuItem>
                                   </MenuList>
@@ -252,3 +267,5 @@ export default function UserDashboard() {
     </Box>
   );
 }
+
+

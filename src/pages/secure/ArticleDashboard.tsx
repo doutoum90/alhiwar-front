@@ -26,7 +26,7 @@ import { FaPlus, FaRedo, FaSearch } from "react-icons/fa";
 import ArticleTable from "../ui/ArticleTable";
 import { articleService } from "../../services/articleService";
 import { categoryService } from "../../services/categoryService";
-import type { ArticleDto, CategoryDto } from "../../types";
+import type { ArticleDto, ArticleStatus, CategoryDto } from "../../types";
 import { useArticleEditor } from "../../hooks/useArticleEditor";
 import ArticleEditModal from "./modal/ArticleEditModal";
 import FilterBar from "../ui/FilterBar";
@@ -34,6 +34,7 @@ import { useResetPaginationOnChange } from "../../hooks/useResetPaginationOnChan
 import { useClampPagination } from "../../hooks/useClampPagination";
 import { normalize } from "../../utils/utils";
 import { PAGE_SIZE } from "../../constantes";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function ArticleDashboard() {
   const toast = useToast();
@@ -62,8 +63,28 @@ export default function ArticleDashboard() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const { user } = useAuth();
   const { articleId, loadingArticle, saving, form, setForm, openCreate, openEdit, save: saveEditor } =
     useArticleEditor();
+
+  const userId = useMemo(() => (user?.userId ? String(user.userId) : ""), [user]);
+  const isPrivileged = useMemo(() => {
+    const role = normalize(user?.role ?? "");
+    const roles = (user?.roles ?? []).map((r) => normalize(r));
+    return role === "admin" || role === "editor" || roles.includes("admin") || roles.includes("editor");
+  }, [user]);
+  const isJournalist = useMemo(() => {
+    const role = normalize(user?.role ?? "");
+    const roles = (user?.roles ?? []).map((r) => normalize(r));
+    return role === "journalist" || roles.includes("journalist");
+  }, [user]);
+  const canReview = isPrivileged;
+  const canCreate = isPrivileged || isJournalist;
+
+  useEffect(() => {
+    if (canReview) return;
+    if (filterStatus === "in_review") setFilterStatus("all");
+  }, [canReview, filterStatus]);
 
   const openCreateModal = () => {
     openCreate();
@@ -92,7 +113,7 @@ export default function ArticleDashboard() {
       const [cats, list, queue] = await Promise.all([
         categoryService.getCategories().catch(() => [] as CategoryDto[]),
         articleService.getArticles().catch(() => [] as ArticleDto[]),
-        articleService.getReviewQueue().catch(() => [] as ArticleDto[]),
+        canReview ? articleService.getReviewQueue().catch(() => [] as ArticleDto[]) : Promise.resolve([] as ArticleDto[]),
       ]);
       const activeCats = (cats ?? []).filter((c: any) => String(c?.status ?? "published").toLowerCase() === "published");
       setCategories(activeCats);
@@ -109,11 +130,11 @@ export default function ArticleDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, canReview]);
 
   useEffect(() => {
     loadAll();
-  }, [loadAll]);
+  }, [loadAll, canReview]);
 
   const filterRows = useCallback(
     (rows: ArticleDto[]) => {
@@ -137,7 +158,50 @@ export default function ArticleDashboard() {
     [q, filterStatus, filterCategoryId]
   );
 
-  const filteredArticles = useMemo(() => filterRows(articles), [articles, filterRows]);
+  const isUserArticle = useCallback(
+    (a: ArticleDto) => {
+      if (!userId) return false;
+      const authorId = String((a as any).authorId ?? (a as any).author?.id ?? "");
+      if (authorId && authorId === userId) return true;
+
+      const links = (a as any).authors;
+      if (Array.isArray(links) && links.length > 0) {
+        return links.some((l: any) => {
+          const uid = String(l?.userId ?? l?.user?.id ?? "");
+          return uid && uid === userId;
+        });
+      }
+
+      return false;
+    },
+    [userId]
+  );
+
+  const canAct = useCallback(
+    (a: ArticleDto, action: "preview" | "edit" | "publish" | "unpublish" | "delete" | "approve" | "reject") => {
+      if (isPrivileged) return true;
+      if (!isJournalist) return false;
+      if (!isUserArticle(a)) return false;
+
+      const status = String(a.status ?? "").toLowerCase();
+      if (action === "preview") return true;
+      if (action === "edit") return status === "draft" || status === "rejected";
+      return false;
+    },
+    [isPrivileged, isJournalist, isUserArticle]
+  );
+
+  const allowedStatuses = useMemo<ArticleStatus[]>(() => {
+    if (isPrivileged) return ["draft", "in_review", "published", "archived", "rejected"];
+    if (isJournalist) return ["draft", "in_review", "rejected"];
+    return ["draft"];
+  }, [isPrivileged, isJournalist]);
+
+  const filteredArticles = useMemo(() => {
+    const base = filterRows(articles);
+    if (canReview) return base;
+    return base.filter((a) => String(a.status ?? "").toLowerCase() !== "in_review" && isUserArticle(a));
+  }, [articles, filterRows, canReview, isUserArticle]);
   const filteredReview = useMemo(() => filterRows(reviewArticles), [reviewArticles, filterRows]);
 
   useResetPaginationOnChange([q, filterStatus, filterCategoryId], () => {
@@ -162,11 +226,11 @@ export default function ArticleDashboard() {
   }, [filteredReview, pageReview]);
 
   const statsAll = useMemo(() => {
-    const total = articles.length;
-    const published = articles.filter((a) => String(a.status).toLowerCase() === "published").length;
-    const draft = articles.filter((a) => String(a.status).toLowerCase() === "draft").length;
+    const total = filteredArticles.length;
+    const published = filteredArticles.filter((a) => String(a.status).toLowerCase() === "published").length;
+    const draft = filteredArticles.filter((a) => String(a.status).toLowerCase() === "draft").length;
     return { total, published, draft };
-  }, [articles]);
+  }, [filteredArticles]);
 
   const statsReview = useMemo(() => {
     const total = reviewArticles.length;
@@ -194,7 +258,10 @@ export default function ArticleDashboard() {
     window.open(`/posts/${encodeURIComponent(a.slug)}?preview=1`, "_blank", "noreferrer");
   };
 
-  const onEdit = (a: ArticleDto) => void openEditModal(a);
+  const onEdit = (a: ArticleDto) => {
+    if (!canAct(a, "edit")) return;
+    void openEditModal(a);
+  };
 
   const onPublish = (a: ArticleDto) =>
     withBusy(a.id, async () => {
@@ -290,7 +357,7 @@ export default function ArticleDashboard() {
                   <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as any)}>
                     <option value="all">Tous les statuts</option>
                     <option value="draft">Brouillon</option>
-                    <option value="in_review">En revue</option>
+                    {canReview ? <option value="in_review">En revue</option> : null}
                     <option value="rejected">Rejeté</option>
                     <option value="published">Publié</option>
                     <option value="archived">Archivé</option>
@@ -311,14 +378,16 @@ export default function ArticleDashboard() {
             <Tabs isFitted variant="enclosed" colorScheme="teal">
               <TabList mb="1em">
                 <Tab>Toutes</Tab>
-                <Tab>
-                  En revue{" "}
-                  {reviewArticles.length > 0 ? (
-                    <Badge ml={2} colorScheme="blue" borderRadius="full">
-                      {reviewArticles.length}
-                    </Badge>
-                  ) : null}
-                </Tab>
+                {canReview ? (
+                  <Tab>
+                    En revue{" "}
+                    {reviewArticles.length > 0 ? (
+                      <Badge ml={2} colorScheme="blue" borderRadius="full">
+                        {reviewArticles.length}
+                      </Badge>
+                    ) : null}
+                  </Tab>
+                ) : null}
               </TabList>
 
               <TabPanels>
@@ -336,7 +405,7 @@ export default function ArticleDashboard() {
                       </Badge>
                     </HStack>
 
-                    <Button leftIcon={<FaPlus />} colorScheme="teal" onClick={openCreateModal} isDisabled={loading}>
+                    <Button leftIcon={<FaPlus />} colorScheme="teal" onClick={openCreateModal} isDisabled={loading || !canCreate}>
                       Nouvel article
                     </Button>
                   </Flex>
@@ -353,6 +422,7 @@ export default function ArticleDashboard() {
                           rows={pagedArticles}
                           categories={categories}
                           busyId={busyId}
+                          canAct={canAct}
                           onPreview={onPreview}
                           onEdit={onEdit}
                           onPublish={onPublish}
@@ -380,7 +450,8 @@ export default function ArticleDashboard() {
                   )}
                 </TabPanel>
 
-                <TabPanel p={0}>
+                {canReview ? (
+                  <TabPanel p={0}>
                   <HStack spacing={2} wrap="wrap" mb={4}>
                     <Badge variant="subtle" colorScheme="gray">
                       Total: {statsReview.total}
@@ -402,6 +473,7 @@ export default function ArticleDashboard() {
                           rows={pagedReview}
                           categories={categories}
                           busyId={busyId}
+                          canAct={canAct}
                           onPreview={onPreview}
                           onEdit={onEdit}
                           onApprove={onApprove}
@@ -426,7 +498,8 @@ export default function ArticleDashboard() {
                       </Flex>
                     </>
                   )}
-                </TabPanel>
+                  </TabPanel>
+                ) : null}
               </TabPanels>
             </Tabs>
           </CardBody>
@@ -442,8 +515,10 @@ export default function ArticleDashboard() {
         form={form}
         setForm={setForm}
         categories={categories}
+        allowedStatuses={allowedStatuses}
         onSave={onSaveModal}
       />
     </Box>
   );
 }
+

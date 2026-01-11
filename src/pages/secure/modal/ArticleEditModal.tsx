@@ -44,11 +44,13 @@ export default function ArticleEditModal({
   form,
   setForm,
   categories,
+  allowedStatuses,
   rightMetaSlot,
   onSave,
   onPreview,
 }: ArticleProps) {
   const isEdit = !!articleId;
+  const statusOptions = allowedStatuses ?? ['draft', 'in_review', 'published', 'archived', 'rejected'];
 
   return (
     <Modal isOpen={isOpen} onClose={saving ? () => {} : onClose} size="6xl" scrollBehavior="inside">
@@ -102,11 +104,15 @@ export default function ArticleEditModal({
                       <FormControl mt={3}>
                         <FormLabel>Statut</FormLabel>
                         <Select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as ArticleStatus })}>
-                          <option value="draft">Brouillon</option>
-                          <option value="in_review">En review</option>
-                          <option value="published">Publié</option>
-                          <option value="archived">Archivé</option>
-                          <option value="rejected">Rejeté</option>
+                          {statusOptions.includes("draft") ? <option value="draft">Brouillon</option> : null}
+
+                          {statusOptions.includes("in_review") ? <option value="in_review">En review</option> : null}
+
+                          {statusOptions.includes("published") ? <option value="published">PubliǸ</option> : null}
+
+                          {statusOptions.includes("archived") ? <option value="archived">ArchivǸ</option> : null}
+
+                          {statusOptions.includes("rejected") ? <option value="rejected">RejetǸ</option> : null}
                         </Select>
                       </FormControl>
 
@@ -169,3 +175,5 @@ export default function ArticleEditModal({
     </Modal>
   );
 }
+
+

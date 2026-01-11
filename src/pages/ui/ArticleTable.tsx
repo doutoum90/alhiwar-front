@@ -46,20 +46,23 @@ export default function ArticleTable({
   rows,
   categories = [],
   busyId = null,
+  canAct,
 
-  onPreview,
-  onEdit,
+  onPreview: onPreviewProp,
+  onEdit: onEditProp,
 
-  onPublish,
-  onUnpublish,
-  onDelete,
+  onPublish: onPublishProp,
+  onUnpublish: onUnpublishProp,
+  onDelete: onDeleteProp,
 
-  onApprove,
-  onReject,
+  onApprove: onApproveProp,
+  onReject: onRejectProp,
 
   showInlineApproveButton = true,
 }: ArticleTableProps) {
   const categoryMap = makeCategoryMap(categories);
+  const canActOn = (a: ArticleDto, action: "preview" | "edit" | "publish" | "unpublish" | "delete" | "approve" | "reject") =>
+    (canAct ? canAct(a, action) : true);
 
   const DisabledItem = ({
     label,
@@ -101,6 +104,13 @@ export default function ArticleTable({
             (mode === "reviewQueue" ? "in_review" : "draft")) as ArticleStatus;
 
           const isBusy = busyId === a.id;
+          const onPreview = canActOn(a, "preview") ? onPreviewProp : undefined;
+          const onEdit = canActOn(a, "edit") ? onEditProp : undefined;
+          const onPublish = canActOn(a, "publish") ? onPublishProp : undefined;
+          const onUnpublish = canActOn(a, "unpublish") ? onUnpublishProp : undefined;
+          const onDelete = canActOn(a, "delete") ? onDeleteProp : undefined;
+          const onApprove = canActOn(a, "approve") ? onApproveProp : undefined;
+          const onReject = canActOn(a, "reject") ? onRejectProp : undefined;
 
           return (
             <Tr key={a.id}>
@@ -321,3 +331,5 @@ export default function ArticleTable({
     </Table>
   );
 }
+
+

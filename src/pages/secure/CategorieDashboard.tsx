@@ -51,7 +51,7 @@ import {
   Divider,
   Select,
 } from "@chakra-ui/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaPlus, FaEdit, FaTrash, FaSearch, FaEllipsisV, FaRedo } from "react-icons/fa";
 import { categoryService } from "../../services/categoryService";
 import type { CategoryDto, CategoryStatus } from "../../types";
@@ -61,6 +61,7 @@ import { useClampPagination } from "../../hooks/useClampPagination";
 import { normalize } from "../../utils/utils";
 import type { CategoryForm } from "../../types";
 import { PAGE_SIZE } from "../../constantes";
+import { useAuth } from "../../contexts/AuthContext";
 
 const CategoriesDashboard = () => {
   const toast = useToast();
@@ -70,6 +71,20 @@ const CategoriesDashboard = () => {
   const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
 
   const { isOpen: isRejectOpen, onOpen: onRejectOpen, onClose: onRejectClose } = useDisclosure();
+  const { user } = useAuth();
+  const userId = useMemo(() => (user?.userId ? String(user.userId) : ""), [user]);
+  const isPrivileged = useMemo(() => {
+    const role = normalize(user?.role ?? "");
+    const roles = (user?.roles ?? []).map((r) => normalize(r));
+    return role === "admin" || role === "editor" || roles.includes("admin") || roles.includes("editor");
+  }, [user]);
+  const isJournalist = useMemo(() => {
+    const role = normalize(user?.role ?? "");
+    const roles = (user?.roles ?? []).map((r) => normalize(r));
+    return role === "journalist" || roles.includes("journalist");
+  }, [user]);
+  const canReview = isPrivileged;
+  const canCreate = isPrivileged || isJournalist;
   const [rejectComment, setRejectComment] = useState("");
 
   const [categories, setCategories] = useState<CategoryDto[]>([]);
@@ -99,12 +114,17 @@ const CategoriesDashboard = () => {
     setPageReview(1);
   });
 
+  useEffect(() => {
+    if (canReview) return;
+    if (filterStatus === "in_review") setFilterStatus("all");
+  }, [canReview, filterStatus]);
+
   const loadAll = async () => {
     setLoading(true);
     try {
       const [list, rq] = await Promise.all([
         categoryService.getCategories().catch(() => [] as CategoryDto[]),
-        (categoryService as any).getReviewQueue?.().catch(() => [] as CategoryDto[]),
+        canReview ? (categoryService as any).getReviewQueue?.().catch(() => [] as CategoryDto[]) : Promise.resolve([] as CategoryDto[]),
       ]);
 
       const all = Array.isArray(list) ? list : [];
@@ -133,7 +153,32 @@ const CategoriesDashboard = () => {
 
   useEffect(() => {
     loadAll();
-  }, []);
+  }, [canReview]);
+
+  const isUserCategory = useCallback(
+    (cat: CategoryDto) => {
+      if (!userId) return false;
+      const createdById = String((cat as any).createdById ?? "");
+      if (createdById && createdById === userId) return true;
+      const submittedById = String((cat as any).submittedById ?? "");
+      if (submittedById && submittedById === userId) return true;
+      return false;
+    },
+    [userId]
+  );
+
+  const canActCategory = useCallback(
+    (cat: CategoryDto, action: "submit" | "approve" | "reject" | "archive" | "edit" | "delete") => {
+      if (isPrivileged) return true;
+      if (!isJournalist) return false;
+      if (!isUserCategory(cat)) return false;
+
+      const s = String(cat.status ?? "").toLowerCase();
+      if (action === "edit" || action === "submit") return s === "draft" || s === "rejected";
+      return false;
+    },
+    [isPrivileged, isJournalist, isUserCategory]
+  );
 
   const filterList = (list: CategoryDto[]) => {
     const t = searchTerm.trim().toLowerCase();
@@ -151,8 +196,15 @@ const CategoriesDashboard = () => {
     });
   };
 
-  const filteredCategories = useMemo(() => filterList(categories), [categories, searchTerm, filterStatus]);
-  const filteredReview = useMemo(() => filterList(reviewCategories), [reviewCategories, searchTerm, filterStatus]);
+  const filteredCategories = useMemo(() => {
+    const base = filterList(categories);
+    if (canReview) return base;
+    return base.filter((c) => String(c.status ?? "").toLowerCase() !== "in_review" && isUserCategory(c));
+  }, [categories, searchTerm, filterStatus, canReview, isUserCategory]);
+  const filteredReview = useMemo(() => {
+    if (!canReview) return [];
+    return filterList(reviewCategories);
+  }, [reviewCategories, searchTerm, filterStatus, canReview]);
 
   const pagesAll = useMemo(() => Math.max(1, Math.ceil(filteredCategories.length / PAGE_SIZE)), [filteredCategories.length]);
   const pagesReview = useMemo(() => Math.max(1, Math.ceil(filteredReview.length / PAGE_SIZE)), [filteredReview.length]);
@@ -191,12 +243,14 @@ const CategoriesDashboard = () => {
   };
 
   const openCreate = () => {
+    if (!canCreate) return;
     setSelectedCategory(null);
     setFormData({ name: "", slug: "", description: "", image: "", color: "", sortOrder: 0 });
     onOpen();
   };
 
   const openEdit = (cat: any) => {
+    if (!canActCategory(cat, "edit")) return;
     setSelectedCategory(cat);
     setFormData({
       name: cat.name || "",
@@ -210,11 +264,17 @@ const CategoriesDashboard = () => {
   };
 
   const confirmDelete = (cat: CategoryDto) => {
+    if (!canActCategory(cat, "delete")) return;
     setSelectedCategory(cat);
     onDeleteOpen();
   };
 
   const handleSave = async () => {
+    if (selectedCategory?.id) {
+      if (!canActCategory(selectedCategory, "edit")) return;
+    } else if (!canCreate) {
+      return;
+    }
     if (!formData.name.trim()) {
       toast({
         title: "Champ requis",
@@ -255,6 +315,7 @@ const CategoriesDashboard = () => {
 
   const handleDelete = async () => {
     if (!selectedCategory?.id) return;
+    if (!canActCategory(selectedCategory, "delete")) return;
     try {
       await categoryService.deleteCategory(selectedCategory.id as any);
       toast({ title: "Catégorie supprimée", status: "success", duration: 2500, isClosable: true });
@@ -275,11 +336,15 @@ const CategoriesDashboard = () => {
     }
   };
 
-  const submit = (cat: CategoryDto) => doWorkflow(() => categoryService.submitForReview(cat.id), "Soumise en revue");
+  const submit = (cat: CategoryDto) => {
+    if (!canActCategory(cat, "submit")) return;
+    return doWorkflow(() => categoryService.submitForReview(cat.id), "Soumise en revue");
+  };
   const approve = (cat: CategoryDto) => doWorkflow(() => categoryService.approveCategory(cat.id), "Catégorie publiée");
   const archive = (cat: CategoryDto) => doWorkflow(() => categoryService.archiveCategory(cat.id), "Catégorie archivée");
 
   const openReject = (cat: CategoryDto) => {
+    if (!canActCategory(cat, "reject")) return;
     setSelectedCategory(cat);
     setRejectComment("");
     onRejectOpen();
@@ -287,6 +352,7 @@ const CategoriesDashboard = () => {
 
   const confirmReject = async () => {
     if (!selectedCategory?.id) return;
+    if (!canActCategory(selectedCategory, "reject")) return;
     await doWorkflow(() => categoryService.rejectCategory(selectedCategory.id, rejectComment || ""), "Catégorie rejetée");
     onRejectClose();
   };
@@ -364,16 +430,16 @@ const CategoriesDashboard = () => {
 
                     <Td>
                       <HStack spacing={2} wrap="wrap">
-                        <Button size="xs" variant="outline" onClick={() => submit(cat)} isDisabled={!can(cat.status, "submit")}>
+                        <Button size="xs" variant="outline" onClick={() => submit(cat)} isDisabled={!can(cat.status, "submit") || !canActCategory(cat, "submit")}>
                           Submit
                         </Button>
-                        <Button size="xs" colorScheme="green" variant="outline" onClick={() => approve(cat)} isDisabled={!can(cat.status, "approve")}>
+                        <Button size="xs" colorScheme="green" variant="outline" onClick={() => approve(cat)} isDisabled={!can(cat.status, "approve") || !canActCategory(cat, "approve")}>
                           Approve
                         </Button>
-                        <Button size="xs" colorScheme="red" variant="outline" onClick={() => openReject(cat)} isDisabled={!can(cat.status, "reject")}>
+                        <Button size="xs" colorScheme="red" variant="outline" onClick={() => openReject(cat)} isDisabled={!can(cat.status, "reject") || !canActCategory(cat, "reject")}>
                           Reject
                         </Button>
-                        <Button size="xs" colorScheme="gray" variant="outline" onClick={() => archive(cat)} isDisabled={!can(cat.status, "archive")}>
+                        <Button size="xs" colorScheme="gray" variant="outline" onClick={() => archive(cat)} isDisabled={!can(cat.status, "archive") || !canActCategory(cat, "archive")}>
                           Archive
                         </Button>
                       </HStack>
@@ -383,10 +449,10 @@ const CategoriesDashboard = () => {
                       <Menu>
                         <MenuButton as={IconButton} icon={<FaEllipsisV />} variant="ghost" size="sm" aria-label="Actions" />
                         <MenuList>
-                          <MenuItem icon={<FaEdit />} onClick={() => openEdit(cat)}>
+                          <MenuItem icon={<FaEdit />} onClick={() => openEdit(cat)} isDisabled={!canActCategory(cat, "edit")}>
                             Modifier
                           </MenuItem>
-                          <MenuItem icon={<FaTrash />} onClick={() => confirmDelete(cat)} color="red.500">
+                          <MenuItem icon={<FaTrash />} onClick={() => confirmDelete(cat)} color="red.500" isDisabled={!canActCategory(cat, "delete")}>
                             Supprimer
                           </MenuItem>
                         </MenuList>
@@ -432,7 +498,7 @@ const CategoriesDashboard = () => {
       <Flex justify="space-between" align="center" mb={6} gap={3} wrap="wrap">
         <Heading size="lg">Gestion des Catégories</Heading>
         <HStack spacing={3}>
-          <Button leftIcon={<FaPlus />} colorScheme="teal" onClick={openCreate}>
+          <Button leftIcon={<FaPlus />} colorScheme="teal" onClick={openCreate} isDisabled={!canCreate}>
             Nouvelle Catégorie
           </Button>
           <Button leftIcon={<FaRedo />} variant="outline" onClick={loadAll} isDisabled={loading}>
@@ -454,7 +520,7 @@ const CategoriesDashboard = () => {
           <Select maxW="220px" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as any)}>
             <option value="all">Tous les statuts</option>
             <option value="draft">Brouillon</option>
-            <option value="in_review">En revue</option>
+            {canReview ? <option value="in_review">En revue</option> : null}
             <option value="rejected">Rejeté</option>
             <option value="published">Publié</option>
             <option value="archived">Archivé</option>
@@ -465,19 +531,21 @@ const CategoriesDashboard = () => {
       <Tabs isFitted variant="enclosed" colorScheme="teal">
         <TabList mb="1em">
           <Tab>Toutes</Tab>
-          <Tab>
-            En revue{" "}
-            {reviewCategories.length > 0 ? (
-              <Badge ml={2} colorScheme="blue" borderRadius="full">
-                {reviewCategories.length}
-              </Badge>
-            ) : null}
-          </Tab>
+          {canReview ? (
+            <Tab>
+              En revue{" "}
+              {reviewCategories.length > 0 ? (
+                <Badge ml={2} colorScheme="blue" borderRadius="full">
+                  {reviewCategories.length}
+                </Badge>
+              ) : null}
+            </Tab>
+          ) : null}
         </TabList>
 
         <TabPanels>
           <TabPanel p={0}>
-            {renderTable(pagedCategories, "Aucune catégorie", {
+            {renderTable(pagedCategories, "Aucune catǸgorie", {
               page: pageAll,
               pages: pagesAll,
               total: filteredCategories.length,
@@ -485,20 +553,21 @@ const CategoriesDashboard = () => {
               onNext: () => setPageAll((p) => Math.min(pagesAll, p + 1)),
             })}
           </TabPanel>
-
-          <TabPanel p={0}>
-            {renderTable(pagedReviewCategories, "Aucune catégorie en revue", {
-              page: pageReview,
-              pages: pagesReview,
-              total: filteredReview.length,
-              onPrev: () => setPageReview((p) => Math.max(1, p - 1)),
-              onNext: () => setPageReview((p) => Math.min(pagesReview, p + 1)),
-            })}
-          </TabPanel>
+          {canReview ? (
+            <TabPanel p={0}>
+              {renderTable(pagedReviewCategories, "Aucune catǸgorie en revue", {
+                page: pageReview,
+                pages: pagesReview,
+                total: filteredReview.length,
+                onPrev: () => setPageReview((p) => Math.max(1, p - 1)),
+                onNext: () => setPageReview((p) => Math.min(pagesReview, p + 1)),
+              })}
+            </TabPanel>
+          ) : null}
         </TabPanels>
       </Tabs>
 
-      {}
+      { }
       <Modal isOpen={isOpen} onClose={saving ? () => { } : onClose} size="xl">
         <ModalOverlay />
         <ModalContent>
@@ -558,7 +627,7 @@ const CategoriesDashboard = () => {
         </ModalContent>
       </Modal>
 
-      {}
+      { }
       <AlertDialog isOpen={isRejectOpen} leastDestructiveRef={cancelRef} onClose={onRejectClose}>
         <AlertDialogOverlay>
           <AlertDialogContent>
@@ -581,7 +650,7 @@ const CategoriesDashboard = () => {
         </AlertDialogOverlay>
       </AlertDialog>
 
-      {}
+      { }
       <AlertDialog isOpen={isDeleteOpen} leastDestructiveRef={cancelRef} onClose={onDeleteClose}>
         <AlertDialogOverlay>
           <AlertDialogContent>
@@ -603,3 +672,14 @@ const CategoriesDashboard = () => {
 };
 
 export default CategoriesDashboard;
+
+
+
+
+
+
+
+
+
+
+

@@ -579,6 +579,7 @@ export type ArticleProps = {
   setForm: (v: ArticleEditorForm) => void;
 
   categories: CategoryDto[];
+  allowedStatuses?: ArticleStatus[];
 
   rightMetaSlot?: ReactNode;
 
@@ -600,6 +601,10 @@ export type ArticleTableProps = {
   rows: ArticleDto[];
   categories?: CategoryDto[];
   busyId?: string | null;
+  canAct?: (
+    a: ArticleDto,
+    action: "preview" | "edit" | "publish" | "unpublish" | "delete" | "approve" | "reject"
+  ) => boolean;
 
   onPreview?: (a: ArticleDto) => void;
   onEdit?: (a: ArticleDto) => void;
