@@ -1,7 +1,6 @@
 
-import { PROTECTED_MENU } from "../../constantes";
-import type { AccessRule, AuthUser } from "../../types";
-
+import { PROTECTED_MENU } from "../constantes";
+import type { AuthUser } from "../types";
 
 export function can(me: AuthUser | null | undefined, perm: string) {
   return Array.isArray(me?.permissions) && me!.permissions!.includes(perm);
@@ -23,13 +22,13 @@ export function canAccess(
 
   const userPerms = new Set((me.permissions ?? []).map((p) => String(p)));
 
-  
+
   if (rule.roles?.length) {
     const okRole = rule.roles.some((r) => userRoles.has(String(r).toLowerCase()));
     if (!okRole) return false;
   }
 
-  
+
   if (rule.permissions?.length) {
     const mode = rule.permissionsMode ?? "all";
 
@@ -43,7 +42,6 @@ export function canAccess(
 
   return true;
 }
-
 
 export function resolvePrivateFallback(me: AuthUser) {
   const safeItems = PROTECTED_MENU.filter((x: any) => x.path !== "/auth/login");

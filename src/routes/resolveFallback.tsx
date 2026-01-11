@@ -1,5 +1,5 @@
 
-import { canAccess } from "../utils/auth/access"
+import { canAccess } from "../utils/access"
 import { PRIVATE_ROUTE_RULES } from "./appRoutes";
 
 

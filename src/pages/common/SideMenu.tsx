@@ -26,7 +26,7 @@ import { PROTECTED_MENU } from "../../constantes";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "../../hooks/useTheme";
 import { useAdminBadges } from "../../hooks/useAdminBadges";
-import { canAccess } from "../../utils/auth/access";
+import { canAccess } from "../../utils/access";
 
 const MotionBox = motion(Box);
 const MotionButton = motion(Button);
