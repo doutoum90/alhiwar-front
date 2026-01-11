@@ -1,4 +1,4 @@
-// src/services/rbacService.ts
+
 import { apiFetch } from "./api";
 
 export type RoleDto = { id: string; key: string; name: string };

@@ -1,4 +1,4 @@
-// src/pages/secure/UserDashboard.tsx
+
 import {
   Badge,
   Box,
@@ -47,7 +47,7 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<UserDto[]>([]);
 
-  // Filters
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState<"all" | "admin" | "editor" | "user">("all");
   const [filterStatus, setFilterStatus] = useState<"all" | "active" | "inactive" | "suspended">("all");
@@ -72,7 +72,7 @@ export default function UserDashboard() {
 
   useEffect(() => {
     loadAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   const filtered = useMemo(() => {
@@ -129,7 +129,7 @@ export default function UserDashboard() {
 
             <Divider my={5} />
 
-            {/* ✅ FilterBar only */}
+            {}
             <FilterBar
               mb={5}
               left={

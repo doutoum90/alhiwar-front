@@ -1,4 +1,4 @@
-// src/pages/secure/UserRolesPage.tsx
+
 import {
   Box, Card, CardBody, Heading, HStack, VStack, Text, Spinner,
   Checkbox, CheckboxGroup, Button, useToast, useColorModeValue
@@ -39,7 +39,7 @@ export default function UserRolesPage() {
     }
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [userId]);
+  useEffect(() => { load();  }, [userId]);
 
   const save = async () => {
     if (!userId) return;

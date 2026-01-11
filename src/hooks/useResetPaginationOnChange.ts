@@ -1,11 +1,6 @@
 import { useEffect, useRef } from "react";
 
-/**
- * Reset pagination when dependencies change (except on first mount).
- *
- * Example:
- * useResetPaginationOnChange([q, status], () => setPage(1))
- */
+
 export function useResetPaginationOnChange(
     deps: unknown[],
     onReset: () => void,

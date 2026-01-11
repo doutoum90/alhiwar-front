@@ -1,4 +1,4 @@
-// src/pages/admin/StatDashboard.tsx
+
 import {
   Box,
   Heading,
@@ -67,7 +67,7 @@ const StatDashboard = () => {
 
   useEffect(() => {
     fetchAll(selectedPeriod);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [selectedPeriod]);
 
   const StatCard = ({
@@ -111,7 +111,7 @@ const StatDashboard = () => {
     </Card>
   );
 
-  // ---------- DATA MAPPING (from DashboardStatsDto) ----------
+  
   const usersTotal = dash?.users?.total ?? 0;
   const usersActive = dash?.users?.active ?? 0;
 
@@ -121,29 +121,29 @@ const StatDashboard = () => {
   const totalLikes = articlesSummary?.totalLikes ?? 0;
   const totalComments = articlesSummary?.totalComments ?? 0;
 
-  // These growth props depend on your backend response.
+  
   const usersGrowth = (dash?.users as any)?.usersGrowth ?? undefined;
   const articlesGrowth = articlesSummary?.articlesGrowth ?? undefined;
   const viewsGrowth = articlesSummary?.viewsGrowth ?? undefined;
 
-  // If you don't have monthlyGrowth on backend, keep 0.
+  
   const monthlyGrowth = (articlesSummary as any)?.monthlyGrowth ?? 0;
 
-  // Ads
+  
   const ads = dash?.adsSummary ?? null;
   const topAds = dash?.topAds ?? [];
   const adsByType = dash?.adsByType ?? [];
 
-  // Contact
+  
   const unreadContact = dash?.contactUnread?.count ?? 0;
 
-  // Newsletter
+  
   const newsletterActive = dash?.newsletter?.active ?? 0;
   const newsletterTotal = dash?.newsletter?.total ?? 0;
 
-  // NOTE: Your previous UI had "traffic devices/sources/monthly".
-  // With your current backend list, there is no traffic endpoint.
-  // So we show Ads by type + Top Ads instead.
+  
+  
+  
 
   const deviceIcon = (device: string) => {
     const d = (device || "").toLowerCase();
@@ -152,7 +152,7 @@ const StatDashboard = () => {
     return FaGlobe;
   };
 
-  // Convert adsByType to a "device-like" list (optional UI reuse)
+  
   const adsTypeBars = useMemo(() => {
     return adsByType.map((x: AdsByTypeDto) => {
       const ctr = Number(x.ctr ?? 0);
@@ -197,7 +197,7 @@ const StatDashboard = () => {
         </Flex>
       ) : null}
 
-      {/* ====== TOP STATS ====== */}
+      {}
       <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mb={8}>
         <StatCard title="Utilisateurs total" value={usersTotal} icon={FaUsers} growth={usersGrowth} color="blue.500" />
         <StatCard
@@ -216,7 +216,7 @@ const StatDashboard = () => {
         />
       </SimpleGrid>
 
-      {/* ====== MID STATS ====== */}
+      {}
       <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={8}>
         <Card bg={cardBg}>
           <CardBody>
@@ -264,7 +264,7 @@ const StatDashboard = () => {
         </Card>
       </SimpleGrid>
 
-      {/* ====== TOP ADS + ADS BY TYPE ====== */}
+      {}
       <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8} mb={8}>
         <Card bg={cardBg}>
           <CardBody>
@@ -350,7 +350,7 @@ const StatDashboard = () => {
         </Card>
       </SimpleGrid>
 
-      {/* ====== OTHER SUMMARY ====== */}
+      {}
       <Card bg={cardBg} mb={8}>
         <CardBody>
           <Heading size="md" mb={4}>
@@ -388,7 +388,7 @@ const StatDashboard = () => {
         </CardBody>
       </Card>
 
-      {/* ====== TABLE: ADS BY TYPE ====== */}
+      {}
       <Card bg={cardBg}>
         <CardBody>
           <Heading size="md" mb={4}>

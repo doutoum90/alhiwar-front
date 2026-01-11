@@ -32,11 +32,11 @@ export function register(data: any) {
     });
 }
 export async function fetchUser(): Promise<MeDto | null> {
-    // si pas de token => pas de /me
+    
     const token = localStorage.getItem("access_token");
     if (!token) return null;
 
-    // ton backend: GET /api/auth/me
+    
     return apiFetch("/api/auth/me");
 }
 
@@ -54,12 +54,12 @@ export const logout = async (): Promise<void> => {
         await apiFetch(`${AUTH_API_ENDPOINTS}/logout`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ refresh_token: refreshToken }), // ✅ important
+            body: JSON.stringify({ refresh_token: refreshToken }), 
         });
     } catch (error) {
         console.error('Logout API error:', error);
     } finally {
-        // Toujours nettoyer les tokens
+        
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
     }

@@ -1,4 +1,4 @@
-// src/services/adsService.ts
+
 import { apiFetch } from "./api";
 
 export type AdType = "banner" | "sidebar" | "popup" | "inline";
@@ -64,7 +64,7 @@ const cleanStringOrNull = (v: unknown) => {
 };
 
 export const adsService = {
-  // ===== Admin listing =====
+  
   getAds(): Promise<AdDto[]> {
     return apiFetch("/api/ads");
   },
@@ -73,7 +73,7 @@ export const adsService = {
     return apiFetch(`/api/ads/${id}`);
   },
 
-  // ===== Admin CRUD =====
+  
   createAd(payload: CreateAdDto): Promise<AdDto> {
     const body: any = {
       title: payload.title?.trim(),
@@ -83,7 +83,7 @@ export const adsService = {
       type: payload.type ?? "banner",
       startDate: payload.startDate ?? null,
       endDate: payload.endDate ?? null,
-      // ⚠️ on NE force PAS status ici : c’est le backend qui décide (draft / in_review / published selon rôle)
+      
     };
 
     return apiFetch("/api/ads", {
@@ -114,7 +114,7 @@ export const adsService = {
     return apiFetch(`/api/ads/${id}`, { method: "DELETE" });
   },
 
-  // ===== Workflow =====
+  
   getReviewQueue(): Promise<AdDto[]> {
     return apiFetch(`/api/ads/review-queue`);
   },
@@ -137,8 +137,8 @@ export const adsService = {
     return apiFetch(`/api/ads/${id}/archive`, { method: "POST" });
   },
 
-  // ===== Public =====
-  // ton Home.tsx appelle déjà ça => backend doit renvoyer des "published" valides (date range)
+  
+  
   getActiveAds(): Promise<AdDto[]> {
     return apiFetch("/api/ads/active");
   },
@@ -147,18 +147,18 @@ export const adsService = {
     return apiFetch(`/api/ads/${id}/approve`, { method: "POST" });
   },
 
-  // ===== Public =====
-  // ✅ route existante
+  
+  
   getPublished(): Promise<AdDto[]> {
     return apiFetch("/api/ads/published");
   },
 
-  // ✅ route existante
+  
   getPublishedByType(type: AdType): Promise<AdDto[]> {
     return apiFetch(`/api/ads/type/${encodeURIComponent(type)}`);
   },
 
-  // Tracking (OK)
+  
   recordClick(id: string) {
     return apiFetch(`/api/ads/${id}/click`, { method: "POST" });
   },

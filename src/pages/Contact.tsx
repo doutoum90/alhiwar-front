@@ -53,7 +53,7 @@ export const Contact = () => {
             p={{ base: 6, md: 8 }}
             boxShadow="xl"
           >
-            {/* Formulaire */}
+            {}
             <GridItem>
               <form onSubmit={handleSubmit}>
                 <VStack spacing={6}>
@@ -128,7 +128,7 @@ export const Contact = () => {
               </form>
             </GridItem>
 
-            {/* Informations de contact */}
+            {}
             <GridItem>
               <VStack spacing={8} align="start" height="100%">
                 <Box>
@@ -165,7 +165,7 @@ export const Contact = () => {
                   </VStack>
                 </Box>
 
-                {/* Réseaux sociaux (comme Footer) */}
+                {}
                 <Box w="100%">
                   <Heading size="sm" mb={3} color={useColorModeValue("teal.600", "teal.300")}>
                     Suivez-nous

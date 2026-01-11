@@ -1,11 +1,11 @@
-// src/auth/access.ts
+
 import { PROTECTED_MENU } from "../../constantes";
 
 export type AuthUser = {
-  // legacy
+  
   role?: string;
 
-  // RBAC
+  
   roles?: string[];
   permissions?: string[];
 };
@@ -14,10 +14,10 @@ export type AccessRule = {
   role?: string;
   roles?: string[];
   permissions?: string[];
-  permissionsMode?: "all" | "any"; // default: all
+  permissionsMode?: "all" | "any"; 
 };
 
-/** Compat avec l'ancien code */
+
 export function can(me: AuthUser | null | undefined, perm: string) {
   return Array.isArray(me?.permissions) && me!.permissions!.includes(perm);
 }
@@ -38,13 +38,13 @@ export function canAccess(
 
   const userPerms = new Set((me.permissions ?? []).map((p) => String(p)));
 
-  // roles
+  
   if (rule.roles?.length) {
     const okRole = rule.roles.some((r) => userRoles.has(String(r).toLowerCase()));
     if (!okRole) return false;
   }
 
-  // permissions
+  
   if (rule.permissions?.length) {
     const mode = rule.permissionsMode ?? "all";
 
@@ -59,11 +59,7 @@ export function canAccess(
   return true;
 }
 
-/**
- * Fallback sûr après login / si accès refusé:
- * - prend le premier item du PROTECTED_MENU autorisé (hors logout)
- * - sinon profile
- */
+
 export function resolvePrivateFallback(me: AuthUser) {
   const safeItems = PROTECTED_MENU.filter((x: any) => x.path !== "/auth/login");
 

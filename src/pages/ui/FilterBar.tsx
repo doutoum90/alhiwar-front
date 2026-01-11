@@ -6,12 +6,12 @@ export default function FilterBar({ left, right, mb = 6 }: FilterBarProps) {
         <Card mb={mb}>
             <CardBody>
                 <Flex gap={4} wrap="wrap" justify="space-between" align={{ base: "stretch", md: "center" }}>
-                    {/* LEFT */}
+                    {}
                     <Box flex="1" minW={{ base: "full", md: "420px" }}>
                         {left}
                     </Box>
 
-                    {/* RIGHT */}
+                    {}
                     {right ? (
                         <Box w={{ base: "full", md: "auto" }}>
                             <Flex

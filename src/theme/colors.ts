@@ -1,5 +1,5 @@
 export const COLORS = {
-  // Couleurs principales
+  
   PRIMARY: '#3d84a8',
   PRIMARY_LIGHT: '#569ec2',
   PRIMARY_DARK: '#2f6783',
@@ -9,7 +9,7 @@ export const COLORS = {
   GRAY_DISABLED: '#7C818D',
   BLACK: '#000000',
 
-  // Couleurs pour le mode sombre
+  
   DARK: {
     BACKGROUND: '#2f6783',
     TEXT: '#ffffff',
@@ -17,7 +17,7 @@ export const COLORS = {
     BORDER: '#7cb3cf',
   },
 
-  // Couleurs pour le mode clair
+  
   LIGHT: {
     BACKGROUND: '#ffffff',
     TEXT: '#2f6783',

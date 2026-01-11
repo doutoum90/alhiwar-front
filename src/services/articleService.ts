@@ -1,4 +1,4 @@
-// src/services/articleService.ts
+
 import type { CommentDto } from "../types";
 import { apiFetch } from "./api";
 
@@ -112,7 +112,7 @@ const qs = (params: Record<string, any>) => {
 };
 
 export const articleService = {
-  // ===== Articles =====
+  
   getArticles(): Promise<ArticleDto[]> {
     return apiFetch("/api/articles");
   },
@@ -178,7 +178,7 @@ export const articleService = {
     return apiFetch(`/api/articles/${id}`, { method: "DELETE" });
   },
 
-  // ===== Review workflow =====
+  
   submitForReview(id: string): Promise<ArticleDto> {
     return apiFetch(`/api/articles/${id}/submit`, { method: "POST" });
   },
@@ -199,7 +199,7 @@ export const articleService = {
     });
   },
 
-  // ===== Media =====
+  
   listMedia(articleId: string): Promise<ArticleMediaDto[]> {
     return apiFetch(`/api/articles/${articleId}/media`);
   },
@@ -236,7 +236,7 @@ export const articleService = {
     return apiFetch(`/api/articles/media/${mediaId}`, { method: "DELETE" });
   },
 
-  // ===== Authors =====
+  
   getAuthors(articleId: string): Promise<Array<{ userId: string; isMain: boolean; user: UserMiniDto }>> {
     return apiFetch(`/api/articles/${articleId}/authors`);
   },
@@ -257,7 +257,7 @@ export const articleService = {
     });
   },
 
-  // ===== Likes =====
+  
   toggleLike(articleId: string): Promise<{ liked: boolean }> {
     return apiFetch(`/api/articles/${articleId}/like`, { method: "POST" });
   },
@@ -266,7 +266,7 @@ export const articleService = {
     return apiFetch(`/api/articles/${articleId}/like`);
   },
 
-  // ===== Comments (protected) =====
+  
   addComment(articleId: string, dto: { content: string }): Promise<CommentDto> {
     return apiFetch(`/api/articles/${articleId}/comments`, {
       method: "POST",
@@ -291,7 +291,7 @@ export const articleService = {
     return apiFetch(`/api/articles/comments/${commentId}`, { method: "DELETE" });
   },
 
-  // ===== Comments (public) =====
+  
   listCommentsPublic(articleId: string, params?: { page?: number; limit?: number }): Promise<Paged<CommentDto>> {
     return apiFetch(`/api/articles/${articleId}/comments/public${qs(params ?? {})}`);
   },

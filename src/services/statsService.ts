@@ -1,10 +1,10 @@
-// src/services/statsService.ts
+
 import { apiFetch } from "./api";
 
-/** Same enum you already use */
+
 export type Period = "7" | "30" | "90" | "365";
 
-/* ========================= USERS ========================= */
+
 
 export interface UsersStatsSummaryDto {
   total: number;
@@ -13,14 +13,14 @@ export interface UsersStatsSummaryDto {
   byRole: Array<{ role: string; count: string | number }>;
 }
 
-/* ========================= ARTICLES ========================= */
+
 
 export interface ArticlesInReviewCountDto {
   count: number;
 }
 
-// You already had something like this in the front.
-// Keep it, but note: the backend must return these fields.
+
+
 export interface ArticlesStatsSummaryDto {
   totalArticles: number;
   publishedArticles: number;
@@ -28,14 +28,14 @@ export interface ArticlesStatsSummaryDto {
   totalLikes: number;
   totalComments: number;
 
-  // optional growth metrics if your backend returns them
+  
   articlesGrowth?: number;
   viewsGrowth?: number;
   likesGrowth?: number;
   commentsGrowth?: number;
 }
 
-/* ========================= AUTH ========================= */
+
 
 export interface AuthStatsSummaryDto {
   registrations: number;
@@ -44,7 +44,7 @@ export interface AuthStatsSummaryDto {
   loginsGrowth?: number;
 }
 
-/* ========================= ADS ========================= */
+
 
 export interface AdsStatsSummaryDto {
   totalAds: number;
@@ -77,7 +77,7 @@ export interface TopAdDto {
   revenue: number;
 }
 
-/* ========================= CATEGORIES ========================= */
+
 
 export interface CategoriesStatsSummaryDto {
   totalCategories: number;
@@ -86,7 +86,7 @@ export interface CategoriesStatsSummaryDto {
   archivedCategories: number;
 }
 
-/* ========================= AUTHORS ========================= */
+
 
 export interface AuthorsStatsSummaryDto {
   total: number;
@@ -95,7 +95,7 @@ export interface AuthorsStatsSummaryDto {
   byRole: Array<{ role: string; count: string | number }>;
 }
 
-/* ========================= CONTACT ========================= */
+
 
 export interface ContactUnreadCountDto {
   count: number;
@@ -108,7 +108,7 @@ export interface ContactStatsSummaryDto {
   last7Days: number;
 }
 
-/* ========================= NEWSLETTER ========================= */
+
 
 export interface NewsletterStatsSummaryDto {
   total: number;
@@ -118,7 +118,7 @@ export interface NewsletterStatsSummaryDto {
   unverified: number;
 }
 
-/* ========================= GLOBAL DASHBOARD ========================= */
+
 
 export interface DashboardStatsDto {
   period: Period;
@@ -143,20 +143,20 @@ export interface DashboardStatsDto {
   newsletter: NewsletterStatsSummaryDto;
 }
 
-/* ========================= SERVICE ========================= */
+
 
 export const statsService = {
-  /* -------- USERS -------- */
+  
   getUsersSummary(period: Period): Promise<UsersStatsSummaryDto> {
     return apiFetch(`/api/users/stats/summary?period=${encodeURIComponent(period)}`);
   },
 
-  /* -------- AUTHORS -------- */
+  
   getAuthorsSummary(): Promise<AuthorsStatsSummaryDto> {
     return apiFetch(`/api/authors/stats/summary`);
   },
 
-  /* -------- ARTICLES -------- */
+  
   getArticlesSummary(period: Period): Promise<ArticlesStatsSummaryDto> {
     return apiFetch(`/api/articles/stats/summary?period=${encodeURIComponent(period)}`);
   },
@@ -165,12 +165,12 @@ export const statsService = {
     return apiFetch(`/api/articles/stats/in-review-count`);
   },
 
-  /* -------- AUTH -------- */
+  
   getAuthSummary(period: Period): Promise<AuthStatsSummaryDto> {
     return apiFetch(`/api/auth/stats/summary?period=${encodeURIComponent(period)}`);
   },
 
-  /* -------- ADS -------- */
+  
   getAdsSummary(): Promise<AdsStatsSummaryDto> {
     return apiFetch(`/api/ads/stats/summary`);
   },
@@ -183,12 +183,12 @@ export const statsService = {
     return apiFetch(`/api/ads/stats/top?limit=${encodeURIComponent(String(limit))}`);
   },
 
-  /* -------- CATEGORIES -------- */
+  
   getCategoriesSummary(): Promise<CategoriesStatsSummaryDto> {
     return apiFetch(`/api/categories/stats/summary`);
   },
 
-  /* -------- CONTACT -------- */
+  
   getContactSummary(): Promise<ContactStatsSummaryDto> {
     return apiFetch(`/api/contact/stats/summary`);
   },
@@ -197,12 +197,12 @@ export const statsService = {
     return apiFetch(`/api/contact/stats/unread-count`);
   },
 
-  /* -------- NEWSLETTER -------- */
+  
   getNewsletterSummary(): Promise<NewsletterStatsSummaryDto> {
     return apiFetch(`/api/newsletter/stats/summary`);
   },
 
-  /* -------- ONE CALL (dashboard) -------- */
+  
   async getDashboard(period: Period, opts?: { topAdsLimit?: number }): Promise<DashboardStatsDto> {
     const topAdsLimit = opts?.topAdsLimit ?? 10;
 

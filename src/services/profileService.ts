@@ -69,7 +69,7 @@ export const profileService = {
       ...(data.location !== undefined ? { location: cleanStringOrNull(data.location) } : {}),
       ...(data.website !== undefined ? { website: cleanStringOrNull(data.website) } : {}),
       ...(data.company !== undefined ? { company: cleanStringOrNull(data.company) } : {}),
-      ...(data.avatar !== undefined ? { avatar: cleanStringOrNull(data.avatar) } : {}), // ✅ FIX
+      ...(data.avatar !== undefined ? { avatar: cleanStringOrNull(data.avatar) } : {}), 
     };
 
     return apiFetch("/api/users/me", {
@@ -83,12 +83,12 @@ export const profileService = {
     return apiFetch("/api/users/me/notifications", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(notifications), // ✅ FIX (pas { notifications })
+      body: JSON.stringify(notifications), 
     });
   },
 
   changePassword(data: ChangePasswordDto): Promise<void> {
-    return apiFetch("/api/users/me/password", { // ✅ FIX (route correcte)
+    return apiFetch("/api/users/me/password", { 
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),

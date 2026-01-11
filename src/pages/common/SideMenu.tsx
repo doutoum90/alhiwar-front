@@ -114,7 +114,7 @@ export const SideMenu = () => {
       animate={reduceMotion ? false : "show"}
       variants={menuVariants}
     >
-      {/* ===== MENU PRINCIPAL ===== */}
+      {}
       <VStack align="stretch" spacing={2}>
         {filteredMenu
           .filter((x) => x.path !== "/auth/login")
@@ -179,7 +179,7 @@ export const SideMenu = () => {
           })}
       </VStack>
 
-      {/* ===== BAS DU MENU ===== */}
+      {}
       <Center flexDirection="column" gap={3}>
         <Divider borderColor={colors.border} />
 

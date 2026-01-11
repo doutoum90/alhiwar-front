@@ -26,7 +26,7 @@ export function SelectedAuthorRow({
             align="center"
             gap={3}
         >
-            {/* Drag handle */}
+            {}
             <Box
                 {...attributes}
                 {...listeners}

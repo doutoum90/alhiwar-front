@@ -311,7 +311,7 @@ export default function RolePermissionsPage() {
                     </CardBody>
                 </Card>
 
-                {/* Sticky save bar (visible quand dirty) */}
+                {}
                 {isDirty ? (
                     <Box
                         position="sticky"

@@ -1,4 +1,4 @@
-// src/services/contactService.ts
+
 import { apiFetch } from "./api";
 
 export interface ContactFormData {
@@ -30,7 +30,7 @@ export type Paginated<T> = {
 };
 
 export const contactService = {
-  // ===== PUBLIC =====
+  
   sendContactMessage(formData: ContactFormData) {
     return apiFetch("/api/contact", {
       method: "POST",
@@ -39,7 +39,7 @@ export const contactService = {
     });
   },
 
-  // ===== ADMIN =====
+  
   getContacts(params?: { page?: number; limit?: number; unread?: boolean; archived?: boolean }) {
     const q = new URLSearchParams();
     if (params?.page) q.set("page", String(params.page));

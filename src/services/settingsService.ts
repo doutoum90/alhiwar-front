@@ -20,7 +20,7 @@ export interface EmailSettingsDto {
     smtpHost: string;
     smtpPort: number;
     smtpUser: string;
-    smtpPassword?: string | null; // backend peut renvoyer null (masqué)
+    smtpPassword?: string | null; 
     senderName: string;
     senderEmail: string;
     enableSSL: boolean;
@@ -38,7 +38,7 @@ export interface SecuritySettingsDto {
 export interface ApiKeyDto {
     id: string;
     name: string;
-    key?: string; // généralement seulement au moment de la création
+    key?: string; 
     permissions: string[];
     createdAt: string;
     lastUsed?: string | null;
@@ -54,7 +54,7 @@ export interface DbStatsDto {
 }
 
 export const settingsService = {
-    // --- settings
+    
     getAll(): Promise<{
         system: SystemSettingsDto;
         email: EmailSettingsDto;
@@ -87,7 +87,7 @@ export const settingsService = {
         });
     },
 
-    // --- api keys
+    
     listApiKeys(): Promise<ApiKeyDto[]> {
         return apiFetch("/api/api-keys");
     },
@@ -112,7 +112,7 @@ export const settingsService = {
         return apiFetch(`/api/api-keys/${id}`, { method: "DELETE" });
     },
 
-    // --- db
+    
     getDbStats(): Promise<DbStatsDto> {
         return apiFetch("/api/settings/db/stats");
     },

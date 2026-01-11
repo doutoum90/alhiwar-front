@@ -1,6 +1,6 @@
 import { apiFetch } from './api';
 export const authorService = {
-    // Authors endpoints
+    
   async getAuthors() {
     return apiFetch('/api/authors');
   },

@@ -1,4 +1,4 @@
-// src/shared/articleUi.ts
+
 import type { ArticleStatus } from "../services/articleService";
 import type { CategoryDto } from "../services/categoryService";
 
@@ -37,9 +37,7 @@ export const resolveCategoryLabel = (article: any, categoryMap?: Map<string, str
   return categoryMap?.get(cid) || "—";
 };
 
-/* =========================
-   Auteurs (multi)
-========================= */
+
 export type DisplayAuthor = { id: string; name: string; avatar?: string | null; isMain: boolean };
 
 export const getDisplayAuthorsFromArticle = (a: any): DisplayAuthor[] => {
@@ -78,9 +76,7 @@ export const getDisplayAuthorsFromArticle = (a: any): DisplayAuthor[] => {
   return [];
 };
 
-/* =========================
-   Statuts
-========================= */
+
 export const getStatusColor = (status: ArticleStatus) => {
   switch (status) {
     case "published":

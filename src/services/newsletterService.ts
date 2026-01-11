@@ -1,4 +1,4 @@
-// src/services/newsletterService.ts
+
 import { apiFetch } from "./api";
 
 export type NewsletterSubscriberDto = {
@@ -22,7 +22,7 @@ export type Paginated<T> = {
 };
 
 export const newsletterService = {
-    // ===== ADMIN =====
+    
     getSubscribers(params: URLSearchParams) {
         const qs = params.toString();
         return apiFetch(`/api/newsletter/admin${qs ? `?${qs}` : ""}`) as Promise<Paginated<NewsletterSubscriberDto>>;

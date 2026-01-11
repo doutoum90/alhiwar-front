@@ -1,4 +1,4 @@
-// src/pages/admin/components/ArticleTable.tsx
+
 import {
   Avatar,
   Badge,

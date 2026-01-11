@@ -390,7 +390,7 @@ const ParametreDashboard = () => {
         </TabList>
 
         <TabPanels>
-          {/* Général */}
+          
           <TabPanel px={0}>
             <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8}>
               <Card bg={cardBg}>
@@ -592,7 +592,7 @@ const ParametreDashboard = () => {
             </SimpleGrid>
           </TabPanel>
 
-          {/* Email */}
+          
           <TabPanel px={0}>
             <Card bg={cardBg} maxW="2xl">
               <CardBody>
@@ -681,7 +681,7 @@ const ParametreDashboard = () => {
             </Card>
           </TabPanel>
 
-          {/* Sécurité */}
+          
           <TabPanel px={0}>
             <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8}>
               <Card bg={cardBg}>
@@ -825,7 +825,7 @@ const ParametreDashboard = () => {
             </SimpleGrid>
           </TabPanel>
 
-          {/* API */}
+          {}
           <TabPanel px={0}>
             <Card bg={cardBg}>
               <CardBody>
@@ -924,7 +924,7 @@ const ParametreDashboard = () => {
             </Card>
           </TabPanel>
 
-          {/* DB */}
+          {}
           <TabPanel px={0}>
             <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8}>
               <Card bg={cardBg}>

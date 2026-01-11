@@ -18,7 +18,7 @@ export async function apiFetch(input: RequestInfo, init: RequestInit = {}) {
 
   const res = await fetch(`${BASE_URL}${input}`, { ...init, headers });
   if (!res.ok) {
-    // remonte l'erreur brute (ton override 401 s'en chargera)
+    
     const msg = await res.text().catch(() => res.statusText);
     throw new ApiError(res.status, msg || `${res.status}`);
   }
@@ -27,7 +27,7 @@ export async function apiFetch(input: RequestInfo, init: RequestInit = {}) {
   return ct.includes('application/json') ? res.json() : res.text();
 }
 
-// Axios instance si nécessaire pour d'autres parties de l'application
+
 const api = axios.create({
   baseURL: BASE_URL
 });

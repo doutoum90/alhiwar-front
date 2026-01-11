@@ -603,7 +603,7 @@ const AdDashboard = () => {
         </TabList>
 
         <TabPanels>
-          {/* ===== ALL ===== */}
+          {}
           <TabPanel p={0}>
             <FilterBar
               left={
@@ -691,7 +691,7 @@ const AdDashboard = () => {
             </Card>
           </TabPanel>
 
-          {/* ===== REVIEW ===== */}
+          {}
           <TabPanel p={0}>
             <FilterBar
               left={
@@ -776,7 +776,7 @@ const AdDashboard = () => {
         </TabPanels>
       </Tabs>
 
-      {/* Create / Edit modal */}
+      {}
       <Modal isOpen={isOpen} onClose={saving ? () => { } : onClose} size="xl">
         <ModalOverlay />
         <ModalContent>
@@ -893,7 +893,7 @@ const AdDashboard = () => {
         </ModalContent>
       </Modal>
 
-      {/* Reject modal */}
+      {}
       <Modal isOpen={isRejectOpen} onClose={onRejectClose} size="lg">
         <ModalOverlay />
         <ModalContent>
@@ -921,7 +921,7 @@ const AdDashboard = () => {
         </ModalContent>
       </Modal>
 
-      {/* Delete confirm */}
+      {}
       <AlertDialog isOpen={isDeleteOpen} leastDestructiveRef={cancelRef} onClose={onDeleteClose}>
         <AlertDialogOverlay>
           <AlertDialogContent>

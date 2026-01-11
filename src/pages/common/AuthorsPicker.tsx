@@ -165,7 +165,7 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
     }
   };
 
-  /** ⌨️ Keyboard navigation on input */
+  
   const onKeyDownSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!query.trim()) return;
     if (searchLoading) return;
@@ -189,7 +189,7 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
     }
   };
 
-  /** 👑 Drag & drop (selected list) */
+  
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
   const onDragEnd = (event: any) => {
@@ -206,7 +206,7 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
 
   return (
     <VStack align="stretch" spacing={4}>
-      {/* Header */}
+      {}
       <Card>
         <CardBody>
           <HStack>
@@ -226,7 +226,7 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
         </CardBody>
       </Card>
 
-      {/* Search */}
+      {}
       <Card>
         <CardBody>
           <InputGroup>
@@ -242,7 +242,7 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
             />
           </InputGroup>
 
-          {/* Results */}
+          {}
           {query.trim() ? (
             <Box mt={3}>
               <Box ref={resultsTopRef} />
@@ -274,7 +274,7 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
                               {u.name ?? (u as any).username ?? "Utilisateur"}
                             </Text>
 
-                            {/* ⭐ already author */}
+                            {}
                             {already ? (
                               <Badge colorScheme="purple" variant="subtle">
                                 Déjà auteur
@@ -296,7 +296,7 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
                 </Box>
               )}
 
-              {/* Pagination */}
+              {}
               {!searchLoading && pages > 1 ? (
                 <Flex mt={3} align="center" justify="center" wrap="wrap" gap={2}>
                   <Button
@@ -347,7 +347,7 @@ export default function AuthorsPicker({ articleId }: { articleId: string }) {
         </CardBody>
       </Card>
 
-      {/* Selected (👑 drag & drop reorder => main author) */}
+      {}
       <Card>
         <CardBody>
           <HStack mb={3}>

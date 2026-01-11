@@ -1,4 +1,4 @@
-// src/pages/secure/NewsletterTable.tsx
+
 import {
   Badge,
   Flex,

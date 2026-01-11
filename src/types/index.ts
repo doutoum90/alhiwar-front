@@ -64,15 +64,15 @@ export type ArticleTableProps = {
     categories?: CategoryDto[];
     busyId?: string | null;
 
-    onPreview?: (a: ArticleDto) => void; // ✅ optionnel
-    onEdit?: (a: ArticleDto) => void; // ✅ optionnel
+    onPreview?: (a: ArticleDto) => void; 
+    onEdit?: (a: ArticleDto) => void; 
 
-    // ArticleDashboard
+    
     onPublish?: (a: ArticleDto) => void;
     onUnpublish?: (a: ArticleDto) => void;
     onDelete?: (a: ArticleDto) => void;
 
-    // ReviewQueueDashboard
+    
     onApprove?: (a: ArticleDto) => void;
     onReject?: (a: ArticleDto) => void;
 
@@ -202,7 +202,7 @@ export type CacheConsentProps = {
 export type CacheConsent = {
     version: string;
     choice: "accepted" | "rejected";
-    createdAt: string; // ISO
+    createdAt: string; 
 };
 
 export type Link = { userId: string; isMain: boolean; user: UserMiniDto };

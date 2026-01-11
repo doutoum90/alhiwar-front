@@ -103,7 +103,7 @@ export default function MediaManagerPro({ articleId }: { articleId: string }) {
     }
   };
 
-  /* ============ Drag & Drop reorder (HTML5) ============ */
+  
   const [dragId, setDragId] = useState<string | null>(null);
 
   const onDropReorder = async (targetId: string) => {
@@ -138,7 +138,7 @@ export default function MediaManagerPro({ articleId }: { articleId: string }) {
 
   return (
     <VStack align="stretch" spacing={4}>
-      {/* Add by URL */}
+      {}
       <Card>
         <CardBody>
           <HStack mb={3}>
@@ -176,7 +176,7 @@ export default function MediaManagerPro({ articleId }: { articleId: string }) {
         </CardBody>
       </Card>
 
-      {/* Upload */}
+      {}
       <Card>
         <CardBody>
           <HStack mb={3}>
@@ -217,7 +217,7 @@ export default function MediaManagerPro({ articleId }: { articleId: string }) {
         </CardBody>
       </Card>
 
-      {/* List + DnD */}
+      {}
       <Card>
         <CardBody>
           <HStack mb={3}>

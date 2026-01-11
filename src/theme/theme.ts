@@ -6,7 +6,7 @@ const config: ThemeConfig = {
   useSystemColorMode: false,
 };
 
-// Ajout des poids de police manquants
+
 const fontWeights = {
   hairline: 100,
   thin: 200,
@@ -21,7 +21,7 @@ const fontWeights = {
 
 const theme = extendTheme({
   config,
-  // Ajout des fontWeights manquants
+  
   fontWeights,
   shadows: {
     xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
@@ -55,7 +55,7 @@ const theme = extendTheme({
     heading: `'N27', sans-serif`,
     body: `'N27', sans-serif`,
   },
-  // Configuration des tailles de police corrigée
+  
   fontSizes: {
     xs: '0.75rem',
     sm: '0.875rem',
@@ -115,7 +115,7 @@ const theme = extendTheme({
   components: {
     Button: {
       baseStyle: {
-        fontWeight: 'semibold', // Utilise maintenant la configuration fontWeights
+        fontWeight: 'semibold', 
         borderRadius: 'md',
       },
       variants: {
@@ -151,7 +151,7 @@ const theme = extendTheme({
     Heading: {
       baseStyle: ({ colorMode }: { colorMode: string }) => ({
         color: colorMode === 'dark' ? COLORS.WHITE : COLORS.PRIMARY_DARK,
-        fontWeight: 'bold', // Utilise la configuration fontWeights
+        fontWeight: 'bold', 
       }),
     },
     Input: {

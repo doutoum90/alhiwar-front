@@ -30,13 +30,13 @@ import {
 import { apiFetch } from "../../services/api";
 
 export const PrivateFooter = () => {
-  /* ======================= Menu filtré ======================= */
+  
   const footerMenu = useMemo(
     () => PROTECTED_MENU.filter((item: any) => !item?.danger && item?.name !== "Déconnexion"),
     []
   );
 
-  /* ======================= Newsletter ======================= */
+  
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const toast = useToast();
@@ -94,7 +94,7 @@ export const PrivateFooter = () => {
     }
   };
 
-  /* ======================= Render ======================= */
+  
   return (
     <Box bg="gray.800" color="white" mt={16}>
       <Flex
@@ -109,7 +109,7 @@ export const PrivateFooter = () => {
           gap={8}
           mb={12}
         >
-          {/* ===== Brand ===== */}
+          {}
           <GridItem>
             <Heading size="lg" mb={4} color="teal.300">
               Alhiwar
@@ -121,7 +121,7 @@ export const PrivateFooter = () => {
             </Text>
           </GridItem>
 
-          {/* ===== Navigation ===== */}
+          {}
           <GridItem>
             <Heading size="md" mb={4} color="teal.300">
               Navigation
@@ -140,7 +140,7 @@ export const PrivateFooter = () => {
             </Flex>
           </GridItem>
 
-          {/* ===== Contact ===== */}
+          {}
           <GridItem>
             <Heading size="md" mb={4} color="teal.300">
               Contact
@@ -165,7 +165,7 @@ export const PrivateFooter = () => {
             </Flex>
           </GridItem>
 
-          {/* ===== Newsletter + Social ===== */}
+          {}
           <GridItem>
             <Heading size="md" mb={4} color="teal.300">
               Newsletter
@@ -227,7 +227,7 @@ export const PrivateFooter = () => {
           </GridItem>
         </Grid>
 
-        {/* ===== Bottom bar ===== */}
+        {}
         <Flex
           borderTop="1px solid"
           borderColor="gray.700"

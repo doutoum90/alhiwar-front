@@ -80,7 +80,7 @@ const safeNumber = (n: unknown, fallback = 0) => {
   return Number.isFinite(x) ? x : fallback;
 };
 
-/* ===== Helpers: HTML -> TOC + reading time ===== */
+
 type TocItem = { id: string; text: string; level: 2 | 3 };
 
 const slugify = (s: string) =>
@@ -133,7 +133,7 @@ const scrollToId = (id: string) => {
   window.scrollTo({ top: y, behavior: "smooth" });
 };
 
-/* ===== Pagination helpers (ellipses) ===== */
+
 const buildPageItems = (page: number, pages: number) => {
   const items: Array<number | "…"> = [];
   if (pages <= 9) {
@@ -173,7 +173,7 @@ const normalizePaged = <T,>(res: any, fallbackPage: number, fallbackLimit: numbe
   return { items: [], total: 0, page: fallbackPage, limit: fallbackLimit, pages: 1 };
 };
 
-/* ===== Article HTML renderer ===== */
+
 const ArticleHtml = ({ html }: { html: string }) => {
   const bg = useColorModeValue("white", "gray.800");
   const border = useColorModeValue("blackAlpha.200", "whiteAlpha.200");
@@ -228,7 +228,7 @@ const ArticleHtml = ({ html }: { html: string }) => {
   );
 };
 
-/* ======================= Media support ======================= */
+
 const normalizeMediaType = (m: ArticleMediaDto): "image" | "video" | "pdf" | "other" => {
   const t = String((m as any)?.type ?? "").toLowerCase();
   if (t.includes("image")) return "image";
@@ -268,7 +268,7 @@ const toEmbedUrl = (url: string) => {
       return id ? `https://player.vimeo.com/video/${id}` : url;
     }
   } catch {
-    // ignore
+    
   }
   return url;
 };
@@ -487,7 +487,7 @@ const MediaSection = ({ media }: { media: ArticleMediaDto[] }) => {
   );
 };
 
-/* ===== Multi authors helpers ===== */
+
 type DisplayAuthor = { id: string; name: string; avatar?: string | null; isMain: boolean };
 
 const getDisplayAuthors = (article: ArticleDto): DisplayAuthor[] => {
@@ -702,7 +702,7 @@ export default function PostDetail() {
         await onCopyLink();
       }
     } catch {
-      // ignore cancel
+      
     }
   };
 

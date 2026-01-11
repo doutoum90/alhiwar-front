@@ -497,7 +497,7 @@ const CategoriesDashboard = () => {
         </TabPanels>
       </Tabs>
 
-      {/* Create / Edit modal */}
+      {}
       <Modal isOpen={isOpen} onClose={saving ? () => { } : onClose} size="xl">
         <ModalOverlay />
         <ModalContent>
@@ -557,7 +557,7 @@ const CategoriesDashboard = () => {
         </ModalContent>
       </Modal>
 
-      {/* Reject dialog */}
+      {}
       <AlertDialog isOpen={isRejectOpen} leastDestructiveRef={cancelRef} onClose={onRejectClose}>
         <AlertDialogOverlay>
           <AlertDialogContent>
@@ -580,7 +580,7 @@ const CategoriesDashboard = () => {
         </AlertDialogOverlay>
       </AlertDialog>
 
-      {/* Delete confirm */}
+      {}
       <AlertDialog isOpen={isDeleteOpen} leastDestructiveRef={cancelRef} onClose={onDeleteClose}>
         <AlertDialogOverlay>
           <AlertDialogContent>

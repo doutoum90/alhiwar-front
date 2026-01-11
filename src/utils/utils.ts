@@ -168,7 +168,7 @@ export function getCacheConsent(): CacheConsent | null {
         if (!raw) return null;
         const parsed = JSON.parse(raw) as CacheConsent;
         if (!parsed?.choice || !parsed?.createdAt) return null;
-        if (parsed.version !== CONSENT_VERSION) return null; // si tu changes la popup, tu forces à redemander
+        if (parsed.version !== CONSENT_VERSION) return null; 
         return parsed;
     } catch {
         return null;

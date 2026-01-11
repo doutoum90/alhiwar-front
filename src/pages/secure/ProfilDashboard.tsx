@@ -311,7 +311,7 @@ const ProfilDashboard = () => {
                 bottom="0"
                 right="0"
                 aria-label="Changer la photo"
-                // TODO: si tu ajoutes endpoint upload avatar
+                
                 onClick={() =>
                   toast({
                     title: "Upload avatar",
@@ -562,7 +562,7 @@ const ProfilDashboard = () => {
         </Card>
       </SimpleGrid>
 
-      {/* Edit Modal */}
+      
       <Modal isOpen={isEditOpen} onClose={onEditClose} size="lg">
         <ModalOverlay />
         <ModalContent>
@@ -632,7 +632,7 @@ const ProfilDashboard = () => {
         </ModalContent>
       </Modal>
 
-      {/* Password Modal */}
+      {}
       <Modal isOpen={isPasswordOpen} onClose={onPasswordClose}>
         <ModalOverlay />
         <ModalContent>
@@ -677,7 +677,7 @@ const ProfilDashboard = () => {
         </ModalContent>
       </Modal>
 
-      {/* Delete Dialog */}
+      {}
       <AlertDialog isOpen={isDeleteOpen} leastDestructiveRef={cancelRef} onClose={onDeleteClose}>
         <AlertDialogOverlay>
           <AlertDialogContent>

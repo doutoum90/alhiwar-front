@@ -1,4 +1,4 @@
-// src/pages/secure/UserRightsPage.tsx
+
 import {
     Box, Card, CardBody, Heading, HStack, VStack, Text, Checkbox, CheckboxGroup,
     Button, useToast, Spinner, useColorModeValue
@@ -33,11 +33,11 @@ export default function UserRightsPage() {
         try {
             const [allRoles, userRoleKeys] = await Promise.all([
                 rbacService.listRoles(),
-                rbacService.getUserRoles(user?.userId), // ✅ string[]
+                rbacService.getUserRoles(user?.userId), 
             ]);
 
             setRoles(allRoles);
-            setSelectedRoleKeys(userRoleKeys); // ✅
+            setSelectedRoleKeys(userRoleKeys); 
         } catch (e: any) {
             toast({ status: "error", title: "Erreur", description: e?.message ?? "Chargement impossible" });
         } finally {
@@ -45,13 +45,13 @@ export default function UserRightsPage() {
         }
     };
 
-    useEffect(() => { load(); /* eslint-disable-next-line */ }, [user?.userId]);
+    useEffect(() => { load();  }, [user?.userId]);
 
     const save = async () => {
         if (!user?.userId) return;
         setSaving(true);
         try {
-            await rbacService.updateUserRoles(user?.userId, selectedRoleKeys); // ✅
+            await rbacService.updateUserRoles(user?.userId, selectedRoleKeys); 
             toast({ status: "success", title: "Enregistré", description: "Rôles utilisateur mis à jour" });
         } catch (e: any) {
             toast({ status: "error", title: "Erreur", description: e?.message ?? "Sauvegarde impossible" });

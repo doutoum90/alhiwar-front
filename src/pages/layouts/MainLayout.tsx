@@ -7,7 +7,7 @@ export const MainLayout = () => (
     <main className="flex-1 container mx-auto p-4">
       <Outlet />
     </main>
-    {/* Ajouter un Footer ici si nécessaire */}
+    {}
   </div>
 );
 

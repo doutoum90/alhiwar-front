@@ -73,8 +73,9 @@ export const About = () => {
                       <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="semibold" color={titleColor}>
                         {paragraph.title}
                       </Text>
-                      {/* petit sous-texte optionnel, si tu veux: */}
-                      {/* <Text fontSize="sm" color={subtitleColor} mt={1}>Cliquez pour afficher</Text> */}
+                      { }
+                      { }
+                      <Text fontSize="sm" color={subtitleColor} mt={1}>Cliquez pour afficher</Text>
                     </Box>
 
                     <AccordionIcon

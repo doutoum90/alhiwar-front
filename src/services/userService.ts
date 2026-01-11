@@ -1,10 +1,10 @@
-// src/services/userService.ts
+
 import { apiFetch } from "./api";
 import type { UserMiniDto } from "./articleService";
 
 export type UserRole = "admin" | "user" | "editor" | string;
 
-// ✅ workflow user
+
 export type UserStatus = "draft" | "in_review" | "rejected" | "active" | "suspended" | "archived";
 
 export interface UserDto {
@@ -24,7 +24,7 @@ export interface UserDto {
   articlesCount?: number | null;
   isEmailVerified?: boolean | null;
 
-  // review fields
+  
   submittedAt?: string | null;
   submittedById?: string | null;
   reviewedAt?: string | null;
@@ -38,7 +38,7 @@ export interface UserCreateDto {
   name: string;
   email: string;
   role?: UserRole;
-  status?: UserStatus; // back: user => forcé à draft
+  status?: UserStatus; 
   isEmailVerified?: boolean;
   avatar?: string | null;
 }
@@ -52,7 +52,7 @@ const cleanStringOrNull = (v: unknown) => {
 };
 
 export const usersService = {
-  // ===== Listing =====
+  
   getUsers(): Promise<UserDto[]> {
     return apiFetch("/api/users");
   },
@@ -65,7 +65,7 @@ export const usersService = {
     return apiFetch(`/api/users/${id}`);
   },
 
-  // ===== CRUD =====
+  
   createUser(data: UserCreateDto): Promise<UserDto> {
     const payload: UserCreateDto = {
       name: data.name.trim(),
@@ -103,12 +103,12 @@ export const usersService = {
     return apiFetch(`/api/users/${id}`, { method: "DELETE" });
   },
 
-  // ===== Workflow =====
+  
   submitForReview(id: string): Promise<UserDto> {
     return apiFetch(`/api/users/${id}/submit`, { method: "POST" });
   },
 
-  // ✅ APPROVE => ACTIVE
+  
   approveUser(id: string): Promise<UserDto> {
     return apiFetch(`/api/users/${id}/approve`, { method: "POST" });
   },

@@ -1,4 +1,4 @@
-// src/services/workflow.ts
+
 export type WorkflowStatus =
   | "draft"
   | "in_review"

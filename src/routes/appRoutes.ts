@@ -1,4 +1,4 @@
-// src/auth/appRoutes.ts
+
 export type GuardRule = { path: string; permissions?: string[]; roles?: string[] };
 
 export const PRIVATE_ROUTE_RULES: GuardRule[] = [
@@ -10,6 +10,6 @@ export const PRIVATE_ROUTE_RULES: GuardRule[] = [
     { path: "/espace-membre/newsletter", permissions: ["newsletter.view"] },
     { path: "/espace-membre/messages", permissions: ["contacts.view"] },
 
-    // RBAC
+    
     { path: "/espace-membre/rbac/roles", permissions: ["rbac.roles.view"] },
 ];

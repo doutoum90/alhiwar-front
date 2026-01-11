@@ -157,7 +157,7 @@ export default function CommentsPanel({ articleId }: { articleId: string }) {
 
   return (
     <VStack align="stretch" spacing={4}>
-      {/* Toolbar */}
+      {}
       <Card>
         <CardBody>
           <HStack wrap="wrap" spacing={3}>
@@ -199,7 +199,7 @@ export default function CommentsPanel({ articleId }: { articleId: string }) {
         </CardBody>
       </Card>
 
-      {/* List */}
+      {}
       <Card>
         <CardBody>
           {loading ? (
@@ -295,7 +295,7 @@ export default function CommentsPanel({ articleId }: { articleId: string }) {
             </Stack>
           )}
 
-          {/* Pagination */}
+          {}
           {!loading && data.pages! > 1 ? (
             <Flex mt={6} align="center" justify="center" wrap="wrap" gap={2}>
               <Button size="sm" variant="outline" onClick={() => setPage(1)} isDisabled={data.page <= 1}>
@@ -352,7 +352,7 @@ export default function CommentsPanel({ articleId }: { articleId: string }) {
         </CardBody>
       </Card>
 
-      {/* Confirm delete */}
+      {}
       <AlertDialog
         isOpen={confirm.isOpen}
         leastDestructiveRef={cancelRef}

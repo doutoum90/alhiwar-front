@@ -31,7 +31,7 @@ export type UiPost = {
   views?: number | null;
 };
 
-/* ------------------ time & formatting ------------------ */
+
 
 export const safeTime = (iso?: string | null) => {
   if (!iso) return 0;
@@ -45,7 +45,7 @@ export const formatDate = (iso?: string | null) => {
   return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString("fr-FR");
 };
 
-/* ------------------ breaking ------------------ */
+
 
 export const BREAKING_HOURS = 48;
 
@@ -57,7 +57,7 @@ export const isBreaking = (iso?: string | null) => {
   return diff >= 0 && diff <= BREAKING_HOURS * 60 * 60 * 1000;
 };
 
-/* ------------------ pattern (shared) ------------------ */
+
 
 export const newspaperPattern = (mode: "light" | "dark") => {
   const dot = mode === "light" ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.06)";
@@ -82,7 +82,7 @@ export const initials = (title: string) => {
   return (a + b).toUpperCase();
 };
 
-/* ------------------ Cover fallback ------------------ */
+
 
 export function CoverFallback({
   title,
@@ -174,7 +174,7 @@ export function CoverFallback({
   );
 }
 
-/* ------------------ Cover ------------------ */
+
 
 export function Cover({
   post,
@@ -185,7 +185,7 @@ export function Cover({
   ratio: number;
   variant: "hero" | "card" | "mini";
 }) {
-  // ✅ hooks toujours appelés, dans le même ordre
+  
   const isDark = useColorModeValue(false, true);
   const patternOpacity = useColorModeValue(0.28, 0.22);
 
@@ -210,7 +210,7 @@ export function Cover({
           <Box
             position="absolute"
             inset={0}
-            opacity={patternOpacity} // ✅ plus de hook ici
+            opacity={patternOpacity} 
             sx={newspaperPattern(isDark ? "dark" : "light")}
             pointerEvents="none"
           />
@@ -247,7 +247,7 @@ export function Cover({
 }
 
 
-/* ------------------ Cards ------------------ */
+
 
 export function HeroCard({ post, onOpen }: { post: UiPost; onOpen: (slugOrId: string) => void }) {
   const bg = useColorModeValue("white", "gray.800");
@@ -529,10 +529,10 @@ export function ArchiveMiniCard({ a, onOpen }: { a: UiPost; onOpen: (slugOrId: s
   );
 }
 
-/* ------------------ Ads (optionnel mais pratique) ------------------ */
+
 
 export function AdCard({ ad, variant }: { ad?: AdDto | null; variant: "banner" | "sidebar" | "inline" }) {
-  // ✅ hooks d'abord
+  
   const bg = useColorModeValue("white", "gray.800");
   const border = useColorModeValue("gray.200", "gray.700");
   const labelBg = useColorModeValue("gray.100", "gray.700");

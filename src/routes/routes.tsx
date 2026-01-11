@@ -14,6 +14,7 @@ const CGU = lazy(() => import('../pages/legal/CGU'));
 const MentionsLegales = lazy(() => import('../pages/legal/MentionsLegales'));
 const PolitiqueConfidentialite = lazy(() => import('../pages/legal/PolitiqueConfidentialite'));
 const CategoryPosts = lazy(() => import('../pages/CategoryPosts'));
+const Categories = lazy(() => import('../pages/Categories'));
 
 const Login = lazy(() => import('../pages/Login'));
 const Register = lazy(() => import('../pages/Register'));
@@ -50,10 +51,11 @@ export const routes = [
     path: '/',
     element: <PublicLayout><Outlet /></PublicLayout>,
     children: [
-      // Routes publiques
+      
       { index: true, element: <Navigate to="posts" replace /> },
       { path: 'posts', element: lazyLoad(Home) },
-      { path: 'categories/:slug', element: lazyLoad(CategoryPosts) }, // ✅ NEW
+      { path: 'categories', element: lazyLoad(Categories) },
+      { path: 'categories/:slug', element: lazyLoad(CategoryPosts) }, 
       { path: 'posts/:postId', element: lazyLoad(PostDetail) },
       { path: 'a-propos', element: lazyLoad(About) },
       { path: 'contact', element: lazyLoad(Contact) },
@@ -68,10 +70,10 @@ export const routes = [
     children: [
       { path: 'login', element: lazyLoad(Login) },
       { path: 'register', element: lazyLoad(Register) },
-      // { path: 'password-reset', element: lazyLoad(PasswordReset) },
+      
     ],
   },
-  // Routes privées
+  
   {
     path: 'espace-membre',
     element: (
@@ -92,7 +94,7 @@ export const routes = [
 
       { path: "users", element: guard(lazyLoad(UserDashboard), { permissions: ["users.view"] }) },
 
-      { path: "profile", element: guard(lazyLoad(ProfilDashboard)) }, // accessible à tous connectés
+      { path: "profile", element: guard(lazyLoad(ProfilDashboard)) }, 
 
       { path: "parametres", element: guard(lazyLoad(ParametreDashboard), { permissions: ["settings.view"] }) },
 
@@ -102,10 +104,10 @@ export const routes = [
 
       { path: "messages", element: guard(lazyLoad(ContactDashboard), { permissions: ["contacts.view"] }) },
 
-      // RBAC admin
+      
       { path: "rbac/roles", element: guard(lazyLoad(RolePermissionsPage), { permissions: ["rbac.roles.view"] }) },
 
-      // gestion des droits d’un user (assign roles)
+      
       { path: "rbac/permissions", element: guard(lazyLoad(UserRightsPage), { permissions: ["rbac.users.assign_roles"] }) },
 
       { path: "rights/users/:userId", element: guard(lazyLoad(UserRolesPage), { permissions: ["rbac.users.assign_roles"] }) },
@@ -113,7 +115,7 @@ export const routes = [
 
   },
 
-  // Gestion des erreurs et redirections
+  
   { path: '404', element: <div>Page non trouvée</div> },
   { path: '*', element: <Navigate to="/404" replace /> },
 ];

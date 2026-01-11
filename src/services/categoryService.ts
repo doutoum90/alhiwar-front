@@ -1,4 +1,4 @@
-// src/services/categoryService.ts
+
 import { apiFetch } from "./api";
 
 export type CategoryStatus = "draft" | "in_review" | "rejected" | "published" | "archived";
@@ -94,7 +94,7 @@ export const categoryService = {
     return apiFetch(`/api/categories/${id}`, { method: "DELETE" });
   },
 
-  // workflow
+  
   submitForReview(id: string): Promise<CategoryDto> {
     return apiFetch(`/api/categories/${id}/submit`, { method: "POST" });
   },

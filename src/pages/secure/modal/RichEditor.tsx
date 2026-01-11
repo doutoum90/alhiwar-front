@@ -19,7 +19,7 @@ export function RichEditor({ value, onChange }: { value: string; onChange: (v: s
     if (!editor) return;
     const current = editor.getHTML();
     if (value !== current) editor.commands.setContent(value || "<p></p>", { emitUpdate: false });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [value, editor]);
 
   if (!editor) return null;

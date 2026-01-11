@@ -39,7 +39,7 @@ export default function Footer() {
   const border = useColorModeValue("gray.200", "gray.700");
   const muted = useColorModeValue("gray.600", "gray.300");
 
-  /* ======================= Newsletter ======================= */
+  
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -100,7 +100,7 @@ export default function Footer() {
 
   return (
     <Box mt={16} borderTop="1px solid" borderColor={border}>
-      {/* ===== Top footer ===== */}
+      {}
       <Box bg={topBg}>
         <Box
           maxW="7xl"
@@ -112,7 +112,7 @@ export default function Footer() {
             templateColumns={{ base: "1fr", md: "repeat(4, 1fr)" }}
             gap={8}
           >
-            {/* Brand */}
+            {}
             <GridItem>
               <Heading
                 size="md"
@@ -148,7 +148,7 @@ export default function Footer() {
               </HStack>
             </GridItem>
 
-            {/* Navigation */}
+            {}
             <GridItem>
               <Heading
                 size="sm"
@@ -177,7 +177,7 @@ export default function Footer() {
               </Flex>
             </GridItem>
 
-            {/* Contact */}
+            {}
             <GridItem>
               <Heading
                 size="sm"
@@ -212,7 +212,7 @@ export default function Footer() {
               </Flex>
             </GridItem>
 
-            {/* Newsletter */}
+            {}
             <GridItem>
               <Heading
                 size="sm"
@@ -266,7 +266,7 @@ export default function Footer() {
         </Box>
       </Box>
 
-      {/* ===== Bottom bar ===== */}
+      {}
       <Box bg={bg}>
         <Box maxW="7xl" mx="auto" px={{ base: 4, md: 6 }} py={6}>
           <Flex
