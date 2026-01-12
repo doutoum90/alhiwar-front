@@ -26,12 +26,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  NumberDecrementStepper,
-  NumberIncrementStepper,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
-  Progress,
   Select,
   SimpleGrid,
   Spinner,
@@ -78,39 +72,63 @@ import {
   FaTimes,
   FaTrash,
 } from "react-icons/fa";
+
 import { adsService, type AdWorkflowStatus } from "../../services/adsService";
 import type { AdDto, AdType } from "../../types";
 import AppTable from "../ui/AppTable";
 import { EmptyRow } from "../ui/EmptyRow";
 import FilterBar from "../ui/FilterBar";
-import { useResetPaginationOnChange } from "../../hooks/useResetPaginationOnChange";
 import { useClampPagination } from "../../hooks/useClampPagination";
-import { normalize, normalizeType, toNumber, ctrPercent, toDateInputValue, toIsoOrNullFromDateInput, typeLabel, workflowColor, workflowLabel } from "../../utils/utils";
+import {
+  normalize,
+  normalizeType,
+  toNumber,
+  ctrPercent,
+  typeLabel,
+  workflowColor,
+  workflowLabel,
+} from "../../utils/utils";
 import { PAGE_SIZE } from "../../constantes";
 import { useAuth } from "../../contexts/AuthContext";
+
+import PlacementDashboard from "./PlacementDashboard";
+import AdEditorModal from "./modal/AdEditorModal";
 
 const AdDashboard = () => {
   const toast = useToast();
   const cancelRef = useRef<HTMLButtonElement>(null);
 
+  // Editor modal (create/edit)
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  // Delete dialog
   const { isOpen: isDeleteOpen, onOpen: onDeleteOpen, onClose: onDeleteClose } = useDisclosure();
+
+  // Reject modal
   const { isOpen: isRejectOpen, onOpen: onRejectOpen, onClose: onRejectClose } = useDisclosure();
+
+  // Preview modal (NEW)
+  const { isOpen: isPreviewOpen, onOpen: onPreviewOpen, onClose: onPreviewClose } = useDisclosure();
 
   const { user } = useAuth();
   const userId = useMemo(() => (user?.userId ? String(user.userId) : ""), [user]);
+
   const isPrivileged = useMemo(() => {
     const role = normalize(user?.role ?? "");
     const roles = (user?.roles ?? []).map((r) => normalize(r));
     return role === "admin" || role === "editor" || roles.includes("admin") || roles.includes("editor");
   }, [user]);
+
   const isJournalist = useMemo(() => {
     const role = normalize(user?.role ?? "");
     const roles = (user?.roles ?? []).map((r) => normalize(r));
     return role === "journalist" || roles.includes("journalist");
   }, [user]);
+
   const canReview = isPrivileged;
   const canCreate = isPrivileged || isJournalist;
+
+  const [tabIndex, setTabIndex] = useState(0);
 
   const [rejectComment, setRejectComment] = useState("");
 
@@ -120,38 +138,21 @@ const AdDashboard = () => {
   const [ads, setAds] = useState<AdDto[]>([]);
   const [reviewAds, setReviewAds] = useState<AdDto[]>([]);
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"all" | AdWorkflowStatus>("all");
-  const [filterType, setFilterType] = useState<"all" | AdType>("all");
+  // Filters: PUBLICITÉS
+  const [qAll, setQAll] = useState("");
+  const [statusAll, setStatusAll] = useState<"all" | AdWorkflowStatus>("all");
+  const [typeAll, setTypeAll] = useState<"all" | AdType>("all");
 
+  // Filters: EN REVUE
+  const [qReview, setQReview] = useState("");
+  const [statusReview, setStatusReview] = useState<"all" | AdWorkflowStatus>("all");
+  const [typeReview, setTypeReview] = useState<"all" | AdType>("all");
+
+  // Pagination
   const [pageAll, setPageAll] = useState(1);
   const [pageReview, setPageReview] = useState(1);
 
   const [selectedAd, setSelectedAd] = useState<AdDto | null>(null);
-
-  const [formData, setFormData] = useState<{
-    title: string;
-    content: string;
-    image: string;
-    link: string;
-    type: AdType;
-    startDate: string;
-    endDate: string;
-    impressions: number;
-    clicks: number;
-    totalRevenue: number;
-  }>({
-    title: "",
-    content: "",
-    image: "",
-    link: "",
-    type: "banner",
-    startDate: "",
-    endDate: "",
-    impressions: 0,
-    clicks: 0,
-    totalRevenue: 0,
-  });
 
   const loadAll = async () => {
     setLoading(true);
@@ -183,6 +184,7 @@ const AdDashboard = () => {
 
   useEffect(() => {
     loadAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canReview]);
 
   const isUserAd = useCallback(
@@ -210,18 +212,18 @@ const AdDashboard = () => {
     [isPrivileged, isJournalist, isUserAd]
   );
 
-  useResetPaginationOnChange([searchTerm, filterStatus, filterType], () => {
-    setPageAll(1);
-    setPageReview(1);
-  });
+  // Reset pagination when filters change
+  useEffect(() => setPageAll(1), [qAll, statusAll, typeAll]);
+  useEffect(() => setPageReview(1), [qReview, statusReview, typeReview]);
 
+  // Disallow "in_review" filter for non reviewers
   useEffect(() => {
     if (canReview) return;
-    if (filterStatus === "in_review") setFilterStatus("all");
-  }, [canReview, filterStatus]);
+    if (statusAll === "in_review") setStatusAll("all");
+  }, [canReview, statusAll]);
 
   const filteredAds = useMemo(() => {
-    const q = searchTerm.trim().toLowerCase();
+    const q = qAll.trim().toLowerCase();
     const base = ads.filter((ad) => {
       const t = normalizeType(ad.type);
       const s = String(ad.status ?? "draft") as AdWorkflowStatus;
@@ -229,18 +231,19 @@ const AdDashboard = () => {
       const matchesSearch =
         !q || (ad.title || "").toLowerCase().includes(q) || (ad.content || "").toLowerCase().includes(q);
 
-      const matchesStatus = filterStatus === "all" ? true : s === filterStatus;
-      const matchesType = filterType === "all" ? true : t === filterType;
+      const matchesStatus = statusAll === "all" ? true : s === statusAll;
+      const matchesType = typeAll === "all" ? true : t === typeAll;
 
       return matchesSearch && matchesStatus && matchesType;
     });
+
     if (canReview) return base;
     return base.filter((ad) => String(ad.status ?? "").toLowerCase() !== "in_review" && isUserAd(ad));
-  }, [ads, searchTerm, filterStatus, filterType, canReview, isUserAd]);
+  }, [ads, qAll, statusAll, typeAll, canReview, isUserAd]);
 
   const filteredReviewAds = useMemo(() => {
     if (!canReview) return [];
-    const q = searchTerm.trim().toLowerCase();
+    const q = qReview.trim().toLowerCase();
     return reviewAds.filter((ad) => {
       const t = normalizeType(ad.type);
       const s = String(ad.status ?? "draft") as AdWorkflowStatus;
@@ -248,15 +251,18 @@ const AdDashboard = () => {
       const matchesSearch =
         !q || (ad.title || "").toLowerCase().includes(q) || (ad.content || "").toLowerCase().includes(q);
 
-      const matchesStatus = filterStatus === "all" ? true : s === filterStatus;
-      const matchesType = filterType === "all" ? true : t === filterType;
+      const matchesStatus = statusReview === "all" ? true : s === statusReview;
+      const matchesType = typeReview === "all" ? true : t === typeReview;
 
       return matchesSearch && matchesStatus && matchesType;
     });
-  }, [reviewAds, searchTerm, filterStatus, filterType, canReview]);
+  }, [reviewAds, qReview, statusReview, typeReview, canReview]);
 
   const pagesAll = useMemo(() => Math.max(1, Math.ceil(filteredAds.length / PAGE_SIZE)), [filteredAds.length]);
-  const pagesReview = useMemo(() => Math.max(1, Math.ceil(filteredReviewAds.length / PAGE_SIZE)), [filteredReviewAds.length]);
+  const pagesReview = useMemo(
+    () => Math.max(1, Math.ceil(filteredReviewAds.length / PAGE_SIZE)),
+    [filteredReviewAds.length]
+  );
 
   useClampPagination(pagesAll, setPageAll);
   useClampPagination(pagesReview, setPageReview);
@@ -282,36 +288,12 @@ const AdDashboard = () => {
   const openCreate = () => {
     if (!canCreate) return;
     setSelectedAd(null);
-    setFormData({
-      title: "",
-      content: "",
-      image: "",
-      link: "",
-      type: "banner",
-      startDate: "",
-      endDate: "",
-      impressions: 0,
-      clicks: 0,
-      totalRevenue: 0,
-    });
     onOpen();
   };
 
   const openEdit = (ad: AdDto) => {
     if (!canActAd(ad, "edit")) return;
     setSelectedAd(ad);
-    setFormData({
-      title: ad.title || "",
-      content: ad.content || "",
-      image: String(ad.image ?? ""),
-      link: String(ad.link ?? ""),
-      type: normalizeType(ad.type),
-      startDate: toDateInputValue(ad.startDate),
-      endDate: toDateInputValue(ad.endDate),
-      impressions: toNumber((ad as any).impressions, 0),
-      clicks: toNumber((ad as any).clicks, 0),
-      totalRevenue: toNumber((ad as any).totalRevenue, 0),
-    });
     onOpen();
   };
 
@@ -321,39 +303,29 @@ const AdDashboard = () => {
     onDeleteOpen();
   };
 
-  const handleSave = async () => {
-    if (selectedAd?.id) {
-      if (!canActAd(selectedAd, "edit")) return;
-    } else if (!canCreate) {
-      return;
-    }
-    if (!formData.title.trim() || !formData.content.trim()) {
-      toast({
-        title: "Champs requis",
-        description: "Titre et contenu sont obligatoires.",
-        status: "warning",
-        duration: 3000,
-        isClosable: true,
-      });
-      return;
-    }
+  const openPreview = (ad: AdDto) => {
+    setSelectedAd(ad);
+    onPreviewOpen();
+  };
 
-    const payload = {
-      title: formData.title.trim(),
-      content: formData.content.trim(),
-      image: formData.image.trim() ? formData.image.trim() : null,
-      link: formData.link.trim() ? formData.link.trim() : null,
-      type: formData.type,
-      startDate: toIsoOrNullFromDateInput(formData.startDate),
-      endDate: toIsoOrNullFromDateInput(formData.endDate),
-    };
-
+  const saveFromModal = async (payload: {
+    title: string;
+    content: string;
+    image: string | null;
+    link: string | null;
+    type: AdType;
+    placementKey: string | null;
+    startDate: string | null;
+    endDate: string | null;
+  }) => {
     setSaving(true);
     try {
       if (selectedAd?.id) {
+        if (!canActAd(selectedAd, "edit")) return;
         await adsService.updateAd(selectedAd.id, payload);
         toast({ title: "Publicité mise à jour", status: "success", duration: 2500, isClosable: true });
       } else {
+        if (!canCreate) return;
         await adsService.createAd(payload);
         toast({ title: "Publicité créée (brouillon)", status: "success", duration: 2500, isClosable: true });
       }
@@ -375,6 +347,7 @@ const AdDashboard = () => {
   const handleDelete = async () => {
     if (!selectedAd?.id) return;
     if (!canActAd(selectedAd, "delete")) return;
+
     setSaving(true);
     try {
       await adsService.deleteAd(selectedAd.id);
@@ -478,19 +451,20 @@ const AdDashboard = () => {
     const impressions = toNumber((ad as any).impressions, 0);
     const clicks = toNumber((ad as any).clicks, 0);
     const ctr = ctrPercent(clicks, impressions);
+
     const canEdit = canActAd(ad, "edit");
-    const canDelete = canActAd(ad, "delete");
+    const canDeleteRow = canActAd(ad, "delete");
     const canSubmit = canActAd(ad, "submit");
     const canApprove = canActAd(ad, "approve");
-    const canReject = canActAd(ad, "reject");
-    const canArchive = canActAd(ad, "archive");
+    const canRejectRow = canActAd(ad, "reject");
+    const canArchiveRow = canActAd(ad, "archive");
 
     return (
       <Tr key={ad.id}>
         <Td>
           <HStack spacing={3}>
             <Image
-              src={ad.image || undefined}
+              src={(ad as any).image || undefined}
               alt={ad.title}
               boxSize="60px"
               objectFit="cover"
@@ -504,6 +478,13 @@ const AdDashboard = () => {
               <Text fontSize="sm" color="gray.600" noOfLines={1}>
                 {ad.content}
               </Text>
+
+              {(ad as any).placementKey ? (
+                <Text fontSize="xs" color="purple.600" noOfLines={1}>
+                  Slot: {(ad as any).placementKey}
+                </Text>
+              ) : null}
+
               {ad.reviewComment ? (
                 <Text fontSize="xs" color="red.600" noOfLines={1}>
                   Motif: {ad.reviewComment}
@@ -531,7 +512,7 @@ const AdDashboard = () => {
           <Menu>
             <MenuButton as={IconButton} icon={<FaEllipsisV />} variant="ghost" size="sm" aria-label="Actions" />
             <MenuList>
-              <MenuItem icon={<FaEye />} isDisabled>
+              <MenuItem icon={<FaEye />} onClick={() => openPreview(ad)}>
                 Prévisualiser
               </MenuItem>
 
@@ -548,14 +529,14 @@ const AdDashboard = () => {
                       <MenuItem icon={<FaCheck />} onClick={() => approve(ad)} isDisabled={!canApprove}>
                         Approuver (publier)
                       </MenuItem>
-                      <MenuItem icon={<FaTimes />} onClick={() => openReject(ad)} color="red.500" isDisabled={!canReject}>
+                      <MenuItem icon={<FaTimes />} onClick={() => openReject(ad)} color="red.500" isDisabled={!canRejectRow}>
                         Rejeter
                       </MenuItem>
                     </>
                   ) : null}
 
                   {s === "published" ? (
-                    <MenuItem icon={<FaArchive />} onClick={() => archive(ad)} isDisabled={!canArchive}>
+                    <MenuItem icon={<FaArchive />} onClick={() => archive(ad)} isDisabled={!canArchiveRow}>
                       Archiver
                     </MenuItem>
                   ) : null}
@@ -564,7 +545,7 @@ const AdDashboard = () => {
                     Modifier
                   </MenuItem>
 
-                  <MenuItem icon={<FaTrash />} onClick={() => confirmDelete(ad)} color="red.500" isDisabled={!canDelete}>
+                  <MenuItem icon={<FaTrash />} onClick={() => confirmDelete(ad)} color="red.500" isDisabled={!canDeleteRow}>
                     Supprimer
                   </MenuItem>
                 </>
@@ -573,7 +554,7 @@ const AdDashboard = () => {
                   <MenuItem icon={<FaCheck />} onClick={() => approve(ad)} isDisabled={!canApprove}>
                     Approuver (publier)
                   </MenuItem>
-                  <MenuItem icon={<FaTimes />} onClick={() => openReject(ad)} color="red.500" isDisabled={!canReject}>
+                  <MenuItem icon={<FaTimes />} onClick={() => openReject(ad)} color="red.500" isDisabled={!canRejectRow}>
                     Rejeter
                   </MenuItem>
                 </>
@@ -584,6 +565,75 @@ const AdDashboard = () => {
       </Tr>
     );
   };
+
+  const FilterBarAll = (
+    <FilterBar
+      left={
+        <InputGroup maxW="520px">
+          <InputLeftElement>
+            <FaSearch color="gray" />
+          </InputLeftElement>
+          <Input placeholder="Rechercher (titre, contenu)…" value={qAll} onChange={(e) => setQAll(e.target.value)} />
+        </InputGroup>
+      }
+      right={
+        <HStack spacing={3} wrap="wrap">
+          <Select maxW="220px" value={statusAll} onChange={(e) => setStatusAll(e.target.value as any)}>
+            <option value="all">Tous les statuts</option>
+            <option value="draft">Brouillon</option>
+            {canReview ? <option value="in_review">En revue</option> : null}
+            <option value="rejected">Rejetée</option>
+            <option value="published">Publiée</option>
+            <option value="archived">Archivée</option>
+          </Select>
+
+          <Select maxW="220px" value={typeAll} onChange={(e) => setTypeAll(e.target.value as any)}>
+            <option value="all">Tous les types</option>
+            <option value="banner">Bannière</option>
+            <option value="sidebar">Barre latérale</option>
+            <option value="popup">Pop-up</option>
+            <option value="inline">Inline</option>
+          </Select>
+        </HStack>
+      }
+    />
+  );
+
+  const FilterBarReview = (
+    <FilterBar
+      left={
+        <InputGroup maxW="520px">
+          <InputLeftElement>
+            <FaSearch color="gray" />
+          </InputLeftElement>
+          <Input placeholder="Rechercher (titre, contenu)…" value={qReview} onChange={(e) => setQReview(e.target.value)} />
+        </InputGroup>
+      }
+      right={
+        <HStack spacing={3} wrap="wrap">
+          <Select maxW="220px" value={statusReview} onChange={(e) => setStatusReview(e.target.value as any)}>
+            <option value="all">Tous les statuts</option>
+            <option value="draft">Brouillon</option>
+            <option value="in_review">En revue</option>
+            <option value="rejected">Rejetée</option>
+            <option value="published">Publiée</option>
+            <option value="archived">Archivée</option>
+          </Select>
+
+          <Select maxW="220px" value={typeReview} onChange={(e) => setTypeReview(e.target.value as any)}>
+            <option value="all">Tous les types</option>
+            <option value="banner">Bannière</option>
+            <option value="sidebar">Barre latérale</option>
+            <option value="popup">Pop-up</option>
+            <option value="inline">Inline</option>
+          </Select>
+        </HStack>
+      }
+    />
+  );
+
+  const showPlacementsTab = isPrivileged;
+  const tabsCount = 1 + (canReview ? 1 : 0) + (showPlacementsTab ? 1 : 0);
 
   return (
     <Container maxW="container.xl" py={6}>
@@ -597,7 +647,7 @@ const AdDashboard = () => {
             Rafraîchir
           </Button>
 
-          {reviewAds.length > 0 ? (
+          {canReview && reviewAds.length > 0 ? (
             <Badge colorScheme="blue" variant="solid" borderRadius="full" px={3}>
               {reviewAds.length} en revue
             </Badge>
@@ -659,9 +709,16 @@ const AdDashboard = () => {
         </Card>
       </SimpleGrid>
 
-      <Tabs isFitted variant="enclosed" colorScheme="teal">
+      <Tabs
+        isFitted={tabsCount <= 3}
+        variant="enclosed"
+        colorScheme="teal"
+        index={tabIndex}
+        onChange={setTabIndex}
+      >
         <TabList mb="1em">
-          <Tab>Toutes</Tab>
+          <Tab>Publicités</Tab>
+
           {canReview ? (
             <Tab>
               En revue{" "}
@@ -672,51 +729,15 @@ const AdDashboard = () => {
               ) : null}
             </Tab>
           ) : null}
+
+          {showPlacementsTab ? <Tab>Placements</Tab> : null}
         </TabList>
 
         <TabPanels>
-          {canReview ? (
+          {/* PUBLICITÉS */}
           <TabPanel p={0}>
-            <FilterBar
-              left={
-                <InputGroup maxW="520px">
-                  <InputLeftElement>
-                    <FaSearch color="gray" />
-                  </InputLeftElement>
-                  <Input
-                    placeholder="Rechercher (titre, contenu)…"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </InputGroup>
-              }
-              right={
-                <SimpleGrid columns={{ base: 2, md: 2 }} spacing={3} minW={{ base: "full", md: "auto" }}>
-                  <Select
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value as any)}
-                  >
-                    <option value="all">Tous les statuts</option>
-                    <option value="draft">Brouillon</option>
-                    {canReview ? <option value="in_review">En revue</option> : null}
-                    <option value="rejected">Rejetée</option>
-                    <option value="published">Publiée</option>
-                    <option value="archived">Archivée</option>
-                  </Select>
+            {FilterBarAll}
 
-                  <Select
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value as any)}
-                  >
-                    <option value="all">Tous les types</option>
-                    <option value="banner">Bannière</option>
-                    <option value="sidebar">Barre latérale</option>
-                    <option value="popup">Pop-up</option>
-                    <option value="inline">Inline</option>
-                  </Select>
-                </SimpleGrid>
-              }
-            />
             <Card>
               <CardBody p={0}>
                 {loading ? (
@@ -744,7 +765,16 @@ const AdDashboard = () => {
                     </AppTable>
 
                     <Divider my={5} />
-                    <Flex justify="space-between" align="center" color="gray.600" fontSize="sm" wrap="wrap" gap={3} px={4} pb={4}>
+                    <Flex
+                      justify="space-between"
+                      align="center"
+                      color="gray.600"
+                      fontSize="sm"
+                      wrap="wrap"
+                      gap={3}
+                      px={4}
+                      pb={4}
+                    >
                       <Text>
                         Page : {pageAll} / {pagesAll} • Total : {filteredAds.length}
                       </Text>
@@ -762,211 +792,148 @@ const AdDashboard = () => {
               </CardBody>
             </Card>
           </TabPanel>
+
+          {/* EN REVUE */}
+          {canReview ? (
+            <TabPanel p={0}>
+              {FilterBarReview}
+
+              <Card>
+                <CardBody p={0}>
+                  {loading ? (
+                    <Flex py={10} justify="center">
+                      <Spinner size="lg" />
+                    </Flex>
+                  ) : (
+                    <>
+                      <AppTable>
+                        <Thead>
+                          <Tr>
+                            <Th>Publicité</Th>
+                            <Th>Type</Th>
+                            <Th>Statut</Th>
+                            <Th isNumeric>Impressions</Th>
+                            <Th isNumeric>Clics</Th>
+                            <Th isNumeric>CTR</Th>
+                            <Th>Actions</Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody>
+                          {pagedReviewAds.map((ad) => renderRow(ad, "review"))}
+                          {pagedReviewAds.length === 0 ? <EmptyRow colSpan={7}>Aucune publicité en revue</EmptyRow> : null}
+                        </Tbody>
+                      </AppTable>
+
+                      <Divider my={5} />
+                      <Flex
+                        justify="space-between"
+                        align="center"
+                        color="gray.600"
+                        fontSize="sm"
+                        wrap="wrap"
+                        gap={3}
+                        px={4}
+                        pb={4}
+                      >
+                        <Text>
+                          Page : {pageReview} / {pagesReview} • Total : {filteredReviewAds.length}
+                        </Text>
+                        <HStack>
+                          <Button size="sm" onClick={() => setPageReview((p) => Math.max(1, p - 1))} isDisabled={pageReview <= 1}>
+                            Précédent
+                          </Button>
+                          <Button size="sm" onClick={() => setPageReview((p) => Math.min(pagesReview, p + 1))} isDisabled={pageReview >= pagesReview}>
+                            Suivant
+                          </Button>
+                        </HStack>
+                      </Flex>
+                    </>
+                  )}
+                </CardBody>
+              </Card>
+            </TabPanel>
           ) : null}
 
-          { }
-          <TabPanel p={0}>
-            <FilterBar
-              left={
-                <InputGroup maxW="520px">
-                  <InputLeftElement>
-                    <FaSearch color="gray" />
-                  </InputLeftElement>
-                  <Input
-                    placeholder="Rechercher (titre, contenu)…"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </InputGroup>
-              }
-              right={
-                <>
-                  <Select maxW="220px" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as any)}>
-                    <option value="all">Tous les statuts</option>
-                    <option value="draft">Brouillon</option>
-                    {canReview ? <option value="in_review">En revue</option> : null}
-                    <option value="rejected">Rejetée</option>
-                    <option value="published">Publiée</option>
-                    <option value="archived">Archivée</option>
-                  </Select>
-
-                  <Select maxW="220px" value={filterType} onChange={(e) => setFilterType(e.target.value as any)}>
-                    <option value="all">Tous les types</option>
-                    <option value="banner">Bannière</option>
-                    <option value="sidebar">Barre latérale</option>
-                    <option value="popup">Pop-up</option>
-                    <option value="inline">Inline</option>
-                  </Select>
-                </>
-              }
-            />
-
-            <Card>
-              <CardBody p={0}>
-                {loading ? (
-                  <Flex py={10} justify="center">
-                    <Spinner size="lg" />
-                  </Flex>
-                ) : (
-                  <>
-                    <AppTable>
-                      <Thead>
-                        <Tr>
-                          <Th>Publicité</Th>
-                          <Th>Type</Th>
-                          <Th>Statut</Th>
-                          <Th isNumeric>Impressions</Th>
-                          <Th isNumeric>Clics</Th>
-                          <Th isNumeric>CTR</Th>
-                          <Th>Actions</Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody>
-                        {pagedReviewAds.map((ad) => renderRow(ad, "review"))}
-                        {pagedReviewAds.length === 0 ? <EmptyRow colSpan={7}>Aucune publicité en revue</EmptyRow> : null}
-                      </Tbody>
-                    </AppTable>
-
-                    <Divider my={5} />
-                    <Flex justify="space-between" align="center" color="gray.600" fontSize="sm" wrap="wrap" gap={3} px={4} pb={4}>
-                      <Text>
-                        Page : {pageReview} / {pagesReview} • Total : {filteredReviewAds.length}
-                      </Text>
-                      <HStack>
-                        <Button size="sm" onClick={() => setPageReview((p) => Math.max(1, p - 1))} isDisabled={pageReview <= 1}>
-                          Précédent
-                        </Button>
-                        <Button size="sm" onClick={() => setPageReview((p) => Math.min(pagesReview, p + 1))} isDisabled={pageReview >= pagesReview}>
-                          Suivant
-                        </Button>
-                      </HStack>
-                    </Flex>
-                  </>
-                )}
-              </CardBody>
-            </Card>
-          </TabPanel>
+          {/* PLACEMENTS */}
+          {showPlacementsTab ? (
+            <TabPanel p={0}>
+              <PlacementDashboard />
+            </TabPanel>
+          ) : null}
         </TabPanels>
       </Tabs>
 
-      { }
-      <Modal isOpen={isOpen} onClose={saving ? () => { } : onClose} size="xl">
+      {/* CREATE/EDIT MODAL */}
+      <AdEditorModal
+        isOpen={isOpen}
+        onClose={onClose}
+        saving={saving}
+        selectedAd={selectedAd}
+        canSave={selectedAd ? canActAd(selectedAd, "edit") : canCreate}
+        onSave={saveFromModal}
+      />
+
+      {/* PREVIEW MODAL */}
+      <Modal isOpen={isPreviewOpen} onClose={onPreviewClose} size="xl">
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>{selectedAd ? "Modifier la publicité" : "Créer une publicité (brouillon)"}</ModalHeader>
-          <ModalCloseButton disabled={saving} />
-          <ModalBody maxH="70vh" overflowY="auto">
-            <VStack spacing={4}>
-              <FormControl isRequired>
-                <FormLabel>Titre</FormLabel>
-                <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
-              </FormControl>
+          <ModalHeader>Prévisualisation de la publicité</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {selectedAd ? (
+              <HStack spacing={4} align="start">
+                <Image
+                  src={(selectedAd as any).image || undefined}
+                  fallbackSrc="https://via.placeholder.com/480x270/CBD5E0/718096?text=Preview"
+                  alt={selectedAd.title}
+                  borderRadius="md"
+                  objectFit="cover"
+                  w={{ base: "140px", md: "280px" }}
+                  h={{ base: "100px", md: "180px" }}
+                />
 
-              <FormControl isRequired>
-                <FormLabel>Contenu</FormLabel>
-                <Textarea value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} rows={4} />
-              </FormControl>
-
-              <HStack width="100%" spacing={4} align="start">
-                <FormControl>
-                  <FormLabel>Image (URL)</FormLabel>
-                  <Input value={formData.image} onChange={(e) => setFormData({ ...formData, image: e.target.value })} />
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel>Lien (URL)</FormLabel>
-                  <Input value={formData.link} onChange={(e) => setFormData({ ...formData, link: e.target.value })} />
-                </FormControl>
-              </HStack>
-
-              <HStack width="100%" spacing={4} align="start">
-                <FormControl>
-                  <FormLabel>Type</FormLabel>
-                  <Select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value as AdType })}>
-                    <option value="banner">Bannière</option>
-                    <option value="sidebar">Barre latérale</option>
-                    <option value="popup">Pop-up</option>
-                    <option value="inline">Inline</option>
-                  </Select>
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel>Date début</FormLabel>
-                  <Input type="date" value={formData.startDate} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} />
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel>Date fin</FormLabel>
-                  <Input type="date" value={formData.endDate} onChange={(e) => setFormData({ ...formData, endDate: e.target.value })} />
-                </FormControl>
-              </HStack>
-
-              <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4} w="100%">
-                <FormControl>
-                  <FormLabel>Impressions</FormLabel>
-                  <NumberInput value={formData.impressions} min={0} isReadOnly>
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel>Clics</FormLabel>
-                  <NumberInput value={formData.clicks} min={0} isReadOnly>
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel>Revenu total (€)</FormLabel>
-                  <NumberInput value={formData.totalRevenue} min={0} precision={2} isReadOnly>
-                    <NumberInputField />
-                    <NumberInputStepper>
-                      <NumberIncrementStepper />
-                      <NumberDecrementStepper />
-                    </NumberInputStepper>
-                  </NumberInput>
-                </FormControl>
-              </SimpleGrid>
-
-              <Card w="100%">
-                <CardBody>
-                  <Text fontWeight="semibold" mb={2}>
-                    CTR (calculé)
+                <VStack align="start" spacing={2} flex={1}>
+                  <Text fontWeight="bold" fontSize="lg">
+                    {selectedAd.title}
                   </Text>
-                  <Progress value={Math.min(100, ctrPercent(formData.clicks, formData.impressions))} size="sm" colorScheme="teal" />
-                  <Text mt={2} fontSize="sm" color="gray.600">
-                    {ctrPercent(formData.clicks, formData.impressions).toFixed(2)}%
-                  </Text>
-                </CardBody>
-              </Card>
 
-              {selectedAd?.status ? (
-                <Badge colorScheme={workflowColor(selectedAd.status)} variant="subtle">
-                  Statut actuel: {workflowLabel(selectedAd.status)}
-                </Badge>
-              ) : null}
-            </VStack>
+                  <Text color="gray.600">{selectedAd.content}</Text>
+
+                  {(selectedAd as any).link ? (
+                    <Text fontSize="sm" color="teal.600">
+                      Lien : {(selectedAd as any).link}
+                    </Text>
+                  ) : (
+                    <Text fontSize="sm" color="gray.500">
+                      Aucun lien
+                    </Text>
+                  )}
+
+                  {(selectedAd as any).placementKey ? (
+                    <Badge colorScheme="purple" variant="subtle">
+                      Emplacement : {(selectedAd as any).placementKey}
+                    </Badge>
+                  ) : null}
+
+                  <HStack spacing={2}>
+                    <Badge colorScheme="blue" variant="subtle">
+                      {typeLabel(normalizeType((selectedAd as any).type))}
+                    </Badge>
+                    <Badge colorScheme={workflowColor(String((selectedAd as any).status ?? "draft") as any)}>
+                      {workflowLabel(String((selectedAd as any).status ?? "draft") as any)}
+                    </Badge>
+                  </HStack>
+                </VStack>
+              </HStack>
+            ) : null}
           </ModalBody>
           <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={onClose} isDisabled={saving}>
-              Annuler
-            </Button>
-            <Button colorScheme="teal" onClick={handleSave} isLoading={saving}>
-              {selectedAd ? "Mettre à jour" : "Créer"}
-            </Button>
+            <Button onClick={onPreviewClose}>Fermer</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
 
-      { }
+      {/* REJECT MODAL */}
       <Modal isOpen={isRejectOpen} onClose={onRejectClose} size="lg">
         <ModalOverlay />
         <ModalContent>
@@ -994,12 +961,14 @@ const AdDashboard = () => {
         </ModalContent>
       </Modal>
 
-      { }
+      {/* DELETE DIALOG */}
       <AlertDialog isOpen={isDeleteOpen} leastDestructiveRef={cancelRef} onClose={onDeleteClose}>
         <AlertDialogOverlay>
           <AlertDialogContent>
             <AlertDialogHeader>Supprimer la publicité</AlertDialogHeader>
-            <AlertDialogBody>Êtes-vous sûr de vouloir supprimer "{selectedAd?.title}" ? Cette action est irréversible.</AlertDialogBody>
+            <AlertDialogBody>
+              Êtes-vous sûr de vouloir supprimer "{selectedAd?.title}" ? Cette action est irréversible.
+            </AlertDialogBody>
             <AlertDialogFooter>
               <Button ref={cancelRef} onClick={onDeleteClose} isDisabled={saving}>
                 Annuler
@@ -1016,6 +985,3 @@ const AdDashboard = () => {
 };
 
 export default AdDashboard;
-
-
-

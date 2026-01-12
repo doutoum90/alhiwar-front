@@ -18,7 +18,7 @@ import {
   Tr,
   VStack,
 } from "@chakra-ui/react";
-import { FaCheck, FaEllipsisV, FaTimes, FaTrash } from "react-icons/fa";
+import { FaArchive, FaCheck, FaEllipsisV, FaTimes, FaTrash } from "react-icons/fa";
 import type { ContactTableProps } from "../../types";
 import { excerpt, toDateLabel } from "../../utils/utils";
 
@@ -29,6 +29,7 @@ export default function ContactTable({
   onRowClick,
   onMarkRead,
   onMarkUnread,
+  onArchive,
   onDelete,
 }: ContactTableProps) {
   const stop = (e: MouseEvent) => e.stopPropagation();
@@ -50,7 +51,13 @@ export default function ContactTable({
           const isBusy = busyId === r.id;
 
           return (
-            <Tr key={r.id} opacity={r.archivedAt ? 0.6 : 1} onClick={() => onRowClick?.(r)} cursor={onRowClick ? "pointer" : "default"}>
+            <Tr
+              key={r.id}
+              opacity={r.archivedAt ? 0.6 : 1}
+              onClick={() => onRowClick?.(r)}
+              cursor={onRowClick ? "pointer" : "default"}
+              _hover={onRowClick ? { bg: "blackAlpha.50" } : undefined}
+            >
               <Td>
                 <VStack align="start" spacing={0}>
                   <Text fontWeight="semibold">{r.name || "—"}</Text>
@@ -110,28 +117,45 @@ export default function ContactTable({
                         Marquer comme lu
                       </MenuItem>
 
-                      <MenuItem
-                        icon={<FaTimes />}
-                        onClick={(e) => {
-                          stop(e);
-                          onMarkUnread?.(r);
-                        }}
-                        isDisabled={!onMarkUnread || !r.isRead || Boolean(r.archivedAt)}
-                      >
-                        Marquer comme non lu
-                      </MenuItem>
+                      {onMarkUnread ? (
+                        <MenuItem
+                          icon={<FaTimes />}
+                          onClick={(e) => {
+                            stop(e);
+                            onMarkUnread?.(r);
+                          }}
+                          isDisabled={!onMarkUnread || !r.isRead || Boolean(r.archivedAt)}
+                        >
+                          Marquer comme non lu
+                        </MenuItem>
+                      ) : null}
 
-                      <MenuItem
-                        icon={<FaTrash />}
-                        onClick={(e) => {
-                          stop(e);
-                          onDelete?.(r);
-                        }}
-                        color="red.500"
-                        isDisabled={!onDelete}
-                      >
-                        Supprimer
-                      </MenuItem>
+                      {onArchive ? (
+                        <MenuItem
+                          icon={<FaArchive />}
+                          onClick={(e) => {
+                            stop(e);
+                            onArchive?.(r);
+                          }}
+                          isDisabled={!onArchive || Boolean(r.archivedAt)}
+                        >
+                          Archiver
+                        </MenuItem>
+                      ) : null}
+
+                      {onDelete ? (
+                        <MenuItem
+                          icon={<FaTrash />}
+                          onClick={(e) => {
+                            stop(e);
+                            onDelete?.(r);
+                          }}
+                          color="red.500"
+                          isDisabled={!onDelete}
+                        >
+                          Supprimer
+                        </MenuItem>
+                      ) : null}
                     </MenuList>
                   </Menu>
                 </Flex>

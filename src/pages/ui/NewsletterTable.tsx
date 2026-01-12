@@ -3,12 +3,12 @@ import type { MouseEvent } from "react";
 import {
   Badge,
   Flex,
+  HStack,
   IconButton,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
-  Switch,
   Table,
   Tbody,
   Td,
@@ -18,7 +18,7 @@ import {
   Tr,
   VStack,
 } from "@chakra-ui/react";
-import { FaEllipsisV, FaTrash } from "react-icons/fa";
+import { FaCheck, FaEllipsisV, FaTimes, FaTrash } from "react-icons/fa";
 import type { NewsletterProps } from "../../types";
 import { toDateLabel } from "../../utils/utils";
 
@@ -49,7 +49,12 @@ export default function NewsletterTable({
           const isBusy = busyId === r.id;
 
           return (
-            <Tr key={r.id} onClick={() => onRowClick?.(r)} cursor={onRowClick ? "pointer" : "default"}>
+            <Tr
+              key={r.id}
+              onClick={() => onRowClick?.(r)}
+              cursor={onRowClick ? "pointer" : "default"}
+              _hover={onRowClick ? { bg: "blackAlpha.50" } : undefined}
+            >
               <Td>
                 <VStack align="start" spacing={0}>
                   <Text fontWeight="semibold">{r.email}</Text>
@@ -60,21 +65,15 @@ export default function NewsletterTable({
               </Td>
 
               <Td>
-                <Switch
-                  isChecked={Boolean(r.isActive)}
-                  onChange={(e) => onToggleActive?.(r, e.target.checked)}
-                  onClick={stop}
-                  isDisabled={!onToggleActive || isBusy}
-                />
+                <Badge colorScheme={r.isActive ? "green" : "gray"}>
+                  {r.isActive ? "Actif" : "Inactif"}
+                </Badge>
               </Td>
 
               <Td>
-                <Switch
-                  isChecked={Boolean(r.isVerified)}
-                  onChange={(e) => onToggleVerified?.(r, e.target.checked)}
-                  onClick={stop}
-                  isDisabled={!onToggleVerified || isBusy}
-                />
+                <Badge colorScheme={r.isVerified ? "green" : "red"}>
+                  {r.isVerified ? "Verifie" : "Non verifie"}
+                </Badge>
               </Td>
 
               <Td>
@@ -96,6 +95,37 @@ export default function NewsletterTable({
                       onClick={stop}
                     />
                     <MenuList>
+                      <MenuItem
+                        icon={r.isActive ? <FaTimes /> : <FaCheck />}
+                        onClick={(e) => {
+                          stop(e);
+                          onToggleActive?.(r, !r.isActive);
+                        }}
+                        isDisabled={!onToggleActive}
+                      >
+                        {r.isActive ? "Desactiver" : "Activer"}
+                      </MenuItem>
+
+                      <MenuItem
+                        icon={r.isVerified ? <FaTimes /> : <FaCheck />}
+                        onClick={(e) => {
+                          stop(e);
+                          onToggleVerified?.(r, !r.isVerified);
+                        }}
+                        isDisabled={!onToggleVerified}
+                      >
+                        {r.isVerified ? "Deverifier" : "Verifier"}
+                      </MenuItem>
+
+                      <HStack px={3} py={1}>
+                        <Badge colorScheme={r.isActive ? "green" : "gray"}>
+                          {r.isActive ? "Actif" : "Inactif"}
+                        </Badge>
+                        <Badge colorScheme={r.isVerified ? "green" : "red"}>
+                          {r.isVerified ? "Verifie" : "Non verifie"}
+                        </Badge>
+                      </HStack>
+
                       <MenuItem
                         icon={<FaTrash />}
                         onClick={(e) => {

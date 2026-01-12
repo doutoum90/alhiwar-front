@@ -18,16 +18,18 @@ const cleanStringOrNull = (v: unknown) => {
 };
 
 export const adsService = {
-  
+
   getAds(): Promise<AdDto[]> {
     return apiFetch("/api/ads");
   },
 
   getOne(id: string): Promise<AdDto> {
-    return apiFetch(`/api/ads/${id}`);
+    return apiFetch(`/api/ads/by-id/${id}`);
+  },
+  getPublishedByPlacementKey(key: string): Promise<AdDto[]> {
+    return apiFetch(`/api/ads/placement?key=${encodeURIComponent(key)}`);
   },
 
-  
   createAd(payload: CreateAdDto): Promise<AdDto> {
     const body: any = {
       title: payload.title?.trim(),
@@ -37,7 +39,7 @@ export const adsService = {
       type: payload.type ?? "banner",
       startDate: payload.startDate ?? null,
       endDate: payload.endDate ?? null,
-      
+
     };
 
     return apiFetch("/api/ads", {
@@ -68,7 +70,7 @@ export const adsService = {
     return apiFetch(`/api/ads/${id}`, { method: "DELETE" });
   },
 
-  
+
   getReviewQueue(): Promise<AdDto[]> {
     return apiFetch(`/api/ads/review-queue`);
   },
@@ -91,8 +93,8 @@ export const adsService = {
     return apiFetch(`/api/ads/${id}/archive`, { method: "POST" });
   },
 
-  
-  
+
+
   getActiveAds(): Promise<AdDto[]> {
     return apiFetch("/api/ads/active");
   },
@@ -101,18 +103,18 @@ export const adsService = {
     return apiFetch(`/api/ads/${id}/approve`, { method: "POST" });
   },
 
-  
-  
+
+
   getPublished(): Promise<AdDto[]> {
     return apiFetch("/api/ads/published");
   },
 
-  
+
   getPublishedByType(type: AdType): Promise<AdDto[]> {
     return apiFetch(`/api/ads/type/${encodeURIComponent(type)}`);
   },
 
-  
+
   recordClick(id: string) {
     return apiFetch(`/api/ads/${id}/click`, { method: "POST" });
   },

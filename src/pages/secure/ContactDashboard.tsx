@@ -41,9 +41,16 @@ import { useResetPaginationOnChange } from "../../hooks/useResetPaginationOnChan
 import { useClampPagination } from "../../hooks/useClampPagination";
 import { normalize, toDateLabel } from "../../utils/utils";
 import type { ContactRow } from "../../types";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function ContactDashboard() {
   const toast = useToast();
+  const { user } = useAuth();
+  const isPrivileged = useMemo(() => {
+    const role = normalize(user?.role ?? "");
+    const roles = (user?.roles ?? []).map((r) => normalize(r));
+    return role === "admin" || role === "editor" || roles.includes("admin") || roles.includes("editor");
+  }, [user]);
 
   const pageBg = useColorModeValue("gray.50", "gray.900");
   const cardBg = useColorModeValue("white", "gray.800");
@@ -188,6 +195,12 @@ export default function ContactDashboard() {
       toastOk("Supprimé");
       await load();
     });
+  const onArchive = (row: ContactRow) =>
+    withBusy(row.id, async () => {
+      await contactService.archiveContact(row.id);
+      toastInfo("Archiv?");
+      await load();
+    });
 
   const openDetails = (row: ContactRow) => {
     setSelected(row);
@@ -275,7 +288,16 @@ export default function ContactDashboard() {
                     </Flex>
                   ) : (
                     <Box overflowX="auto">
-                      <ContactTable mode="all" rows={allRows} busyId={busyId} onRowClick={openDetails} onMarkRead={onMarkRead} onMarkUnread={onMarkUnread} onDelete={onDelete} />
+                      <ContactTable
+                        mode="all"
+                        rows={allRows}
+                        busyId={busyId}
+                        onRowClick={openDetails}
+                        onMarkRead={onMarkRead}
+                        onMarkUnread={isPrivileged ? onMarkUnread : undefined}
+                        onArchive={isPrivileged ? onArchive : undefined}
+                        onDelete={isPrivileged ? onDelete : undefined}
+                      />
                     </Box>
                   )}
                 </TabPanel>
@@ -287,7 +309,16 @@ export default function ContactDashboard() {
                     </Flex>
                   ) : (
                     <Box overflowX="auto">
-                      <ContactTable mode="unread" rows={unreadRows} busyId={busyId} onRowClick={openDetails} onMarkRead={onMarkRead} onMarkUnread={onMarkUnread} onDelete={onDelete} />
+                      <ContactTable
+                        mode="unread"
+                        rows={unreadRows}
+                        busyId={busyId}
+                        onRowClick={openDetails}
+                        onMarkRead={onMarkRead}
+                        onMarkUnread={isPrivileged ? onMarkUnread : undefined}
+                        onArchive={isPrivileged ? onArchive : undefined}
+                        onDelete={isPrivileged ? onDelete : undefined}
+                      />
                     </Box>
                   )}
                 </TabPanel>
@@ -378,4 +409,5 @@ export default function ContactDashboard() {
     </Box>
   );
 }
+
 

@@ -43,6 +43,10 @@ export const contactService = {
     return apiFetch(`/api/contact/archive-read`, { method: "PATCH" }) as Promise<{ affected: number }>;
   },
 
+  archiveContact(id: string) {
+    return apiFetch(`/api/contact/${id}/archive`, { method: "PATCH" }) as Promise<ContactDto>;
+  },
+
   getUnreadCount() {
     return apiFetch("/api/contact/stats/unread-count") as Promise<{ count: number }>;
   },

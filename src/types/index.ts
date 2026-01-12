@@ -36,6 +36,8 @@ export interface AdDto {
 
   createdAt: string;
   updatedAt: string;
+
+  placementKey?: string | null;
 }
 
 export interface CreateAdDto {
@@ -46,6 +48,7 @@ export interface CreateAdDto {
   type?: AdType;
   startDate?: string | null;
   endDate?: string | null;
+  placementKey?: string | null;
 }
 
 export type UpdateAdDto = Partial<CreateAdDto>;
@@ -640,6 +643,7 @@ export type ContactTableProps = {
 
   onMarkRead?: (row: ContactRow) => void;
   onMarkUnread?: (row: ContactRow) => void;
+  onArchive?: (row: ContactRow) => void;
   onDelete?: (row: ContactRow) => void;
 };
 
